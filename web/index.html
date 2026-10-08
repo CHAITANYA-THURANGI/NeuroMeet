@@ -172,6 +172,7 @@
         <div class="status-dot"></div>
         <span id="systemStatus">PyTorch & Models Ready</span>
       </div>
+      <a href="/static/neuromeet-chrome-extension-v1.0.0.zip" download class="btn-ghost" title="Download Chrome Extension for Google Meet / Zoom / Teams">🧩 Chrome Extension</a>
       <a href="/docs" target="_blank" class="btn-ghost">API Docs</a>
       <button class="btn-ghost" onclick="openTranscriptModal()">Paste Transcript</button>
     </div>
@@ -190,11 +191,14 @@
       </div>
       <div class="action-controls">
         <button id="recordBtn" class="btn-record" onclick="toggleRecording()">
-          <span>🎙️</span> <span id="recordBtnText">Record Meeting</span>
+          <span>🎙️</span> <span id="recordBtnText">Record Mic</span>
+        </button>
+        <button id="screenShareBtn" class="btn-record" style="background: linear-gradient(135deg, #6366f1, #3b82f6);" onclick="toggleScreenShare()">
+          <span>🖥️</span> <span id="screenShareBtnText">Share Screen / Meet Tab</span>
         </button>
         <label class="btn-upload">
-          📂 Upload Audio
-          <input type="file" id="audioUploadInput" accept="audio/*" style="display:none;" onchange="handleAudioUpload(event)">
+          📂 Upload Audio / Video
+          <input type="file" id="audioUploadInput" accept="audio/*,video/*,.mp4,.mkv,.webm,.mov,.avi,.wav,.mp3,.m4a,.ogg" style="display:none;" onchange="handleAudioUpload(event)">
         </label>
       </div>
     </div>
@@ -301,6 +305,7 @@
             <button class="btn-export" onclick="exportData('markdown')">📄 Markdown</button>
             <button class="btn-export" onclick="exportData('html')">🖨️ HTML Report</button>
             <button class="btn-export" onclick="exportData('json')">📦 JSON Data</button>
+            <button class="btn-export" onclick="copyFormattedMinutes()">📋 Copy to Clipboard</button>
           </div>
         </div>
       </div>
@@ -692,6 +697,108 @@ Charlie: Excellent, let's keep to this schedule."></textarea>
         document.getElementById("systemStatus").innerText = "Transcript Processing Error";
         alert("Error processing transcript: " + e.message);
       }
+    }
+
+    // Live Screen & Tab Capture (Google Meet / Zoom / MS Teams)
+    let screenRecorder = null;
+    let screenStream = null;
+    let screenChunks = [];
+    let isScreenRecording = false;
+
+    async function toggleScreenShare() {
+      const btn = document.getElementById("screenShareBtn");
+      const text = document.getElementById("screenShareBtnText");
+      const panel = document.getElementById("visualizer-panel");
+
+      if (!isScreenRecording) {
+        try {
+          screenStream = await navigator.mediaDevices.getDisplayMedia({
+            video: true,
+            audio: {
+              echoCancellation: true,
+              noiseSuppression: true,
+              sampleRate: 44100,
+            }
+          });
+
+          const audioTracks = screenStream.getAudioTracks();
+          if (audioTracks.length === 0) {
+            alert("Note: Remember to check 'Share tab audio' or 'Share system audio' in the browser prompt so NeuroMeet can hear the speakers in your call!");
+          }
+
+          screenChunks = [];
+          const mime = MediaRecorder.isTypeSupported("video/webm;codecs=vp9,opus") 
+            ? "video/webm;codecs=vp9,opus" 
+            : "video/webm";
+          screenRecorder = new MediaRecorder(screenStream, { mimeType: mime });
+          screenRecorder.ondataavailable = e => { if (e.data.size > 0) screenChunks.push(e.data); };
+          screenRecorder.onstop = uploadScreenRecording;
+
+          screenStream.getVideoTracks()[0].onended = () => {
+            if (isScreenRecording) toggleScreenShare();
+          };
+
+          screenRecorder.start(1000);
+          isScreenRecording = true;
+          btn.classList.add("recording");
+          text.innerText = "Stop Screen Capture";
+          panel.style.display = "flex";
+          recordStartTime = Date.now();
+          timerInterval = setInterval(updateTimer, 1000);
+          document.getElementById("systemStatus").innerText = "Recording Live Presentation & Meeting Audio...";
+        } catch (err) {
+          console.warn("Screen share cancelled or unsupported:", err);
+        }
+      } else {
+        isScreenRecording = false;
+        if (screenRecorder && screenRecorder.state !== "inactive") screenRecorder.stop();
+        if (screenStream) screenStream.getTracks().forEach(t => t.stop());
+        btn.classList.remove("recording");
+        text.innerText = "Share Screen / Meet Tab";
+        panel.style.display = "none";
+        clearInterval(timerInterval);
+      }
+    }
+
+    async function uploadScreenRecording() {
+      if (screenChunks.length === 0) return;
+      const blob = new Blob(screenChunks, { type: "video/webm" });
+      const formData = new FormData();
+      formData.append("file", blob, "meeting_screen_capture.webm");
+      formData.append("title", "Live Screen & Tab Meeting Session");
+
+      document.getElementById("systemStatus").innerText = "Diarizing & Transcribing Live Presentation Audio...";
+      try {
+        const res = await fetch("/api/v1/meetings/process-audio", { method: "POST", body: formData });
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.detail || `Server returned error status ${res.status}`);
+        }
+        const data = await res.json();
+        renderMeeting(data);
+        document.getElementById("systemStatus").innerText = "Presentation & Speech Processed Successfully";
+      } catch (err) {
+        document.getElementById("systemStatus").innerText = "Processing Error";
+        alert("Failed to analyze screen capture audio: " + err.message);
+      }
+    }
+
+    function copyFormattedMinutes() {
+      if (!currentMeetingData) return;
+      const m = currentMeetingData;
+      let text = `# ${m.title}\n\n`;
+      text += `## Executive Summary\n${m.minutes?.executive_summary || ""}\n\n`;
+      if (m.minutes?.key_decisions?.length) {
+        text += `## Key Decisions\n` + m.minutes.key_decisions.map(d => `- ${d}`).join("\n") + "\n\n";
+      }
+      if (m.action_items?.length) {
+        text += `## Action Items\n` + m.action_items.map(a => `- [ ] **${a.task}** (Assignee: ${a.assignee}, Due: ${a.deadline}, Priority: ${a.priority})`).join("\n") + "\n\n";
+      }
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Meeting minutes copied to clipboard! You can paste directly into Slack, Teams, or Email.");
+      }).catch(err => {
+        alert("Could not copy to clipboard: " + err);
+      });
     }
 
     async function exportData(format) {
