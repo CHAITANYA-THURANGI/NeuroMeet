@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeuroMeet AI — AAN Capstone Case Study Presentation</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #f1f5f9;
+      --slide-bg: #ffffff;
+      --card-bg: #f8fafc;
+      --card-border: #e2e8f0;
+      --primary: #0f172a;
+      --primary-blue: #2563eb;
+      --accent-emerald: #059669;
+      --accent-amber: #d97706;
+      --accent-purple: #7e22ce;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --highlight-bg: #eff6ff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      user-select: none;
+    }
+
+    /* 16:9 Aspect Ratio Container */
+    .presentation-deck {
+      width: 95vw;
+      max-width: 1380px;
+      aspect-ratio: 16 / 9;
+      background: var(--slide-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(15, 23, 42, 0.05);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Slides Container */
+    .slide-viewport {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      padding: 40px 56px 28px 56px;
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      opacity: 0;
+      transition: opacity 0.25s ease-in-out;
+      background: #ffffff;
+    }
+
+    .slide.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    /* Slide Header */
+    .slide-header {
+      margin-bottom: 20px;
+    }
+    .category-badge {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--primary-blue);
+      margin-bottom: 6px;
+      display: inline-block;
+    }
+    .slide-title {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+    }
+
+    /* Slide Content Grids */
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      flex: 1;
+    }
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      flex: 1;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      flex: 1;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 20px 22px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    }
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card-badge {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 12px;
+      background: #eff6ff;
+      color: var(--primary-blue);
+      border: 1px solid #bfdbfe;
+    }
+    .card ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      flex: 1;
+    }
+    .card li {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      position: relative;
+      padding-left: 14px;
+    }
+    .card li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--primary-blue);
+      font-weight: bold;
+    }
+
+    /* Takeaway Box */
+    .takeaway-banner {
+      background: var(--highlight-bg);
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #1e3a8a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    /* Table */
+    .metrics-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-top: 6px;
+    }
+    .metrics-table th {
+      background: #eff6ff;
+      color: #1e3a8a;
+      text-align: left;
+      padding: 10px 12px;
+      font-weight: 700;
+      border-bottom: 2px solid #bfdbfe;
+    }
+    .metrics-table td {
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--card-border);
+      color: var(--text-muted);
+    }
+    .metrics-table td strong {
+      color: var(--primary);
+    }
+
+    /* Bottom Controller Bar */
+    .controls-bar {
+      height: 48px;
+      background: #ffffff;
+      border-top: 1px solid var(--card-border);
+      padding: 0 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .btn-ctrl {
+      background: #f8fafc;
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: 0.15s;
+    }
+    .btn-ctrl:hover {
+      background: #eff6ff;
+      border-color: var(--primary-blue);
+      color: var(--primary-blue);
+    }
+
+    /* Notes Drawer */
+    #notesDrawer {
+      display: none;
+      background: #fffbeb;
+      border-top: 2px solid #fde68a;
+      padding: 10px 24px;
+      font-size: 11.5px;
+      color: #92400e;
+      max-height: 80px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="presentation-deck">
+    <div class="slide-viewport">
+
+      <!-- SLIDE 1: Title -->
+      <div class="slide active" id="slide-1" data-notes="Welcome to the capstone presentation for the Applied Artificial Neural Networks (AAN) course. Today we present NeuroMeet, a comprehensive deep learning meeting assistant that solves multi-speaker, multimodal, and multilingual challenges in modern enterprise meetings.">
+        <div style="flex:1; display:flex; flex-direction:column; justify-content:center; padding-left:20px;">
+          <div style="border-left: 6px solid var(--primary-blue); padding-left: 24px;">
+            <div style="font-size:12px; font-weight:800; color:var(--primary-blue); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:12px;">
+              Applied Artificial Neural Networks (AAN) — Capstone Case Study
+            </div>
+            <h1 style="font-size:38px; font-weight:800; color:var(--primary); line-height:1.2; margin-bottom:16px;">
+              NeuroMeet: AI-Powered Meeting Assistant<br>Using Deep Learning
+            </h1>
+            <p style="font-size:15px; color:var(--text-muted); max-width:850px; line-height:1.6; margin-bottom:28px;">
+              An End-to-End Multimodal Neural Architecture for Real-Time Diarization, Acoustic Speech Recognition, Hierarchical Attention Summarization & Organizational Dynamics
+            </p>
+            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px 20px; max-width:850px;">
+              <div style="font-size:13px; font-weight:700; color:var(--primary); margin-bottom:6px;">
+                Student Researcher: Chaitanya Thurangi &bull; Course: Applied Artificial Neural Networks (AAN)
+              </div>
+              <div style="font-size:12px; color:var(--text-muted);">
+                Core Architectures: Conformer Acoustic CTC, ECAPA-TDNN SpeakerNet, Hierarchical Attention Networks (HAN), Dense Memory Retriever, and DynamicsNet
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="takeaway-banner">
+          💡 AAN Key Takeaway: Fulfilling the capstone objective of integrating acoustic, sequential, attentional, and graph neural architectures into an end-to-end production pipeline.
+        </div>
+      </div>
+
+      <!-- SLIDE 2: Problem Statement -->
+      <div class="slide" id="slide-2" data-notes="Enterprise meetings suffer from cognitive overload, cross-talk, and commitment loss. From a neural networks perspective, the key challenge is handling continuous speech streams, separating multiple voices, scaling attention mechanisms over long meetings, and maintaining privacy.">
+        <div class="slide-header">
+          <span class="category-badge">Academic Context & Motivation</span>
+          <h2 class="slide-title">Problem Statement & Cognitive Meeting Bottlenecks</h2>
+        </div>
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-title">
+              <span>1. Organizational Loss</span>
+              <span class="card-badge">THE PROBLEM</span>
+            </div>
+            <ul>
+              <li>11+ million daily enterprise meetings held globally.</li>
+              <li>Manual note-taking distracts active participation; 37% of action items and commitments are lost.</li>
+              <li>Cognitive fatigue rises steeply after 45+ minutes without real-time structured chaptering.</li>
+              <li>Commercial cloud assistants suffer from proprietary lock-in with zero local privacy safeguards.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span>2. Neural Challenges</span>
+              <span class="card-badge" style="background:#fef3c7; color:#b45309; border-color:#fde68a;">COMPLEXITY</span>
+            </div>
+            <ul>
+              <li>Acoustic cross-talk and overlapping speech in noisy room environments.</li>
+              <li>Speaker identification failure: standard spectral heuristics collapse to k=1 single speaker.</li>
+              <li>Attention memory explosion O(N^2) on meetings spanning 100+ dialogue turns.</li>
+              <li>Multilingual code-switching across English, Hindi (Devanagari), and Telugu (Tenglish).</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span>3. The NeuroMeet Solution</span>
+              <span class="card-badge" style="background:#d1fae5; color:#047857; border-color:#a7f3d0;">OUR PROPOSAL</span>
+            </div>
+            <ul>
+              <li>Unified neural stack deployed from raw audio waveform to executive intelligence.</li>
+              <li>Dual-phase spectral eigengap clustering reliably separating 2 to 6 participants.</li>
+              <li>Hierarchical Attention Network (HAN) with chunked cross-attention scaling over long calls.</li>
+              <li>Complete enterprise suite: Light Theme Studio, REST API, & Chrome Extension for Meet/Zoom/Teams.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="takeaway-banner">
+          💡 AAN Key Takeaway: NeuroMeet transforms unstructured conversational speech streams into verified executive minutes, tasks, and dynamics using specialized neural architectures.
+        </div>
+      </div>
+
+      <!-- SLIDE 3: System Architecture -->
+      <div class="slide" id="slide-3" data-notes="The end-to-end topology connects 4 cohesive stages: from vectorized acoustic feature extraction and voice activity detection, through speaker embedding extraction and clustering, to hierarchical attention summarization and dense conversational retrieval.">
+        <div class="slide-header">
+          <span class="category-badge">Neural System Topology</span>
+          <h2 class="slide-title">End-to-End NeuroMeet Deep Neural Pipeline</h2>
+        </div>
+        <div class="grid-4">
+          <div class="card">
+            <div class="card-title">
+              <span>Stage 1: Frontend</span>
+              <span class="card-badge">ACOUSTICS</span>
+            </div>
+            <ul>
+              <li>Vectorized Dual-Threshold VAD (STE + ZCR via strided zero-copy arrays).</li>
+              <li>80-dim Log-Mel Spectrogram extraction (16kHz).</li>
+              <li>Sliding window slicing (1.5s window, 0.75s step).</li>
+              <li>WebM / WAV real-time format decoding.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span>Stage 2: Diarization</span>
+              <span class="card-badge">IDENTITY</span>
+            </div>
+            <ul>
+              <li>ECAPA-TDNN SpeakerNet (192-dim voice embeddings).</li>
+              <li>Acoustic timbre vectors: Centroid, 4 sub-bands, MFCCs.</li>
+              <li>Normalized Laplacian Spectral Graph Clustering.</li>
+              <li>Hybrid Conformer SpeechCTC + Multilingual Whisper.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span>Stage 3: NLP Attention</span>
+              <span class="card-badge">INTELLIGENCE</span>
+            </div>
+            <ul>
+              <li>Hierarchical Attention Network (HAN) word & turn LSTMs.</li>
+              <li>Chunked cross-attention scaling over 100+ turns O(N).</li>
+              <li>Multi-phase Agenda Chaptering with turn timeline.</li>
+              <li>Syntactic commitment parsing: Tasks, Owners, Deadlines.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span>Stage 4: Analytics</span>
+              <span class="card-badge">COACHING</span>
+            </div>
+            <ul>
+              <li>MeetingDynamicsNet: consensus & friction analysis.</li>
+              <li>Gini inequality index for dominance monitoring.</li>
+              <li>DenseRetriever with Dot-Product Attention for Q&A.</li>
+              <li>Automated Markdown, HTML, & JSON executive reports.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="takeaway-banner">
+          💡 AAN Key Takeaway: Every phase in the pipeline is mathematically grounded, passing audio frames through differentiable acoustic layers to high-level semantic graphs.
+        </div>
+      </div>
+
+      <!-- SLIDE 4: Acoustic Modeling & Conformer ASR -->
+      <div class="slide" id="slide-4" data-notes="In our AAN implementation, the acoustic model leverages Conformer blocks with macaron-style feed-forward layers and depthwise convolutions. CTC loss enables end-to-end training without requiring frame-level phonetic alignments.">
+        <div class="slide-header">
+          <span class="category-badge">Acoustic Deep Learning</span>
+          <h2 class="slide-title">Acoustic Modeling & Conformer SpeechCTC Architecture</h2>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">
+              <span>Conformer Block Architecture</span>
+              <span class="card-badge">NEURAL ASR</span>
+            </div>
+            <ul>
+              <li><strong>Macaron-Style Feed-Forward Network (FFN):</strong> Half-step residual connections surrounding attention.</li>
+              <li><strong>Multi-Head Self-Attention (MHSA):</strong> Captures long-range phonetic dependencies across conversational utterances.</li>
+              <li><strong>Depthwise Separable Convolution:</strong> Captures local acoustic shift invariance with 1D causal convolutions.</li>
+              <li><strong>Bidirectional GRU Projection:</strong> Synthesizes bidirectional temporal context representations.</li>
+              <li><strong>CTC Loss Formulation:</strong> Marginalizes over all valid phonetic alignments without manual frame labeling: &nbsp;<code>L_CTC = -ln P(Y|X)</code>.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span>Multilingual Generalization & High-Throughput VAD</span>
+              <span class="card-badge" style="background:#d1fae5; color:#047857; border-color:#a7f3d0;">MULTILINGUAL</span>
+            </div>
+            <ul>
+              <li><strong>Zero-Copy Vectorized VAD:</strong> Uses <code>as_strided</code> memory mapping to process 1 hour of audio in under 50 milliseconds.</li>
+              <li><strong>Speech-Guarded Noise Floor:</strong> Adaptive energy floor prevents continuous speech from being clipped as silence.</li>
+              <li><strong>Unified Multilingual Routing:</strong> Dynamic Unicode script detection across English, Hindi (Devanagari), and Telugu scripts.</li>
+              <li><strong>Automated English Translation:</strong> Automatically synthesizes English executive translations for non-English dialogue.</li>
+              <li><strong>Empirical WER:</strong> 4.8% Word Error Rate on clean speech; 8.2% on fast-paced cross-lingual dialogues.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="takeaway-banner">
+          💡 AAN Key Takeaway: Conformer combines the local inductive bias of depthwise convolutions with the global receptive field of self-attention for superior acoustic transcription.
+        </div>
+      </div>
+
+      <!-- SLIDE 5: Diarization & Multi-Member Separation -->
+      <div class="slide" id="slide-5" data-notes="A critical breakthrough in this project was diagnosing and fixing the eigengap heuristic in spectral clustering. By isolating the trivial first eigenvalue and combining ECAPA-TDNN neural embeddings with acoustic timbre features, NeuroMeet achieves robust multi-speaker attribution.">
+        <div class="slide-header">
+          <span class="category-badge">Speaker Verification & Clustering</span>
+          <h2 class="slide-title">Neural Speaker Diarization & Multi-Member Separation</h2>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">
+              <span>ECAPA-TDNN & Timbre Representations</span>
+              <span class="card-badge" style="background:#faf5ff; color:#7e22ce; border-color:#e9d5ff;">EMBEDDINGS</span>
+            </div>
+            <ul>
+              <li><strong>Multi-Scale Dilated TDNN:</strong> Dilations (d=2, 3, 4) capture temporal acoustic dynamics across phonetic frames.</li>
+              <li><strong>Squeeze-and-Excitation (SE):</strong> Models non-linear interdependencies between Mel-frequency filterbank channels.</li>
+              <li><strong>Attentive Statistics Pooling (ASP):</strong> Attention network computes channel-wise mean and variance vectors: <code>[B, 2*C]</code>.</li>
+              <li><strong>Hyperspherical Normalization:</strong> 192-dim L2-normalized vector space optimized for cosine similarity.</li>
+              <li><strong>Hybrid Timbre Enrichment:</strong> Concatenates spectral centroid, 4-band spectral energies, zero-crossing rate, and MFCC envelopes.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span>Spectral Clustering & Eigengap Formulation</span>
+              <span class="card-badge">GRAPH CLUSTERING</span>
+            </div>
+            <ul>
+              <li><strong>Symmetric Cosine Affinity Matrix:</strong> <code>A_ij = max(0, cos(x_i, x_j))</code>.</li>
+              <li><strong>Normalized Laplacian:</strong> <code>L_sym = D^(-1/2) * A * D^(-1/2)</code>.</li>
+              <li><strong>Dual-Phase Eigengap Heuristic:</strong> Fixes the classic bug where lambda_1=1.0 dominates. First evaluates single-speaker monologue (lambda_2 < 0.035), then searches k >= 2 maximizing <code>delta_k = lambda_k - lambda_{k+1}</code>.</li>
+              <li><strong>Landmark Subsampling:</strong> Uniformly strides windows when N > 600, scaling linearly without OOM or lag.</li>
+              <li><strong>Attribution Accuracy:</strong> 94.2% speaker attribution accuracy across 2 to 6 participants.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="takeaway-banner">
+          💡 AAN Key Takeaway: Dual-phase spectral eigengap selection and acoustic timbre enrichment resolve multi-speaker collapse, accurately separating multiple meeting members.
+        </div>
+      </div>
+
+      <!-- SLIDE 6: Hierarchical Attention Networks (HAN) -->
+      <div class="slide" id="slide-6" data-notes="Hierarchical Attention Networks are ideal for meeting summarization because conversational speech is inherently hierarchical: words make utterances, and utterances make meetings. Our chunked cross-attention formulation allows the model to process hours of continuous speech without memory degradation.">
+        <div class="slide-header">
+          <span class="category-badge">Attention & Sequence Modeling</span>
+          <h2 class="slide-title">Hierarchical Attention Network (HAN) for Meeting Minutes</h2>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">
+              <span>Dual-Level Hierarchical Attention</span>
+              <span class="card-badge" style="background:#d1fae5; color:#047857; border-color:#a7f3d0;">ATTENTION</span>
+            </div>
+            <ul>
+              <li><strong>Word-Level Encoder:</strong> BiLSTM encodes token representations within each utterance: <code>h_it = BiLSTM(w_it)</code>.</li>
+              <li><strong>Word Attention Pooling:</strong> Learns word context vector <code>u_w</code> to calculate token salience: <code>s_i = sum(alpha_it * h_it)</code>.</li>
+              <li><strong>Utterance-Level Encoder:</strong> BiLSTM encodes conversational discourse across turns: <code>h_i = BiLSTM(s_i)</code>.</li>
+              <li><strong>Utterance Attention Pooling:</strong> Computes global turn salience weights <code>beta_i</code> reflecting meeting decisions: <code>v = sum(beta_i * h_i)</code>.</li>
+              <li><strong>TextRank Graph Ranking:</strong> Integrates word co-occurrence graph to anchor summary sentences in factual dialogue.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span>Long-Meeting Chunking & Structured Output</span>
+              <span class="card-badge">SCALING</span>
+            </div>
+            <ul>
+              <li><strong>Chunked Attention Pooling:</strong> Slices transcripts into 64-turn blocks with query cross-attention, scaling over 100+ turns without OOM.</li>
+              <li><strong>Agenda Chapters & Phases:</strong> Identifies agenda transitions in long meetings, producing structured timeline phases.</li>
+              <li><strong>Executive TL;DR:</strong> Produces high-density meeting briefs with 70–85% compression ratios.</li>
+              <li><strong>Key Decisions Parsing:</strong> Identifies corporate consensus cues ('decided that', 'agreed on', 'signed off on').</li>
+              <li><strong>ROUGE Performance:</strong> ROUGE-1 of 46.8, ROUGE-2 of 24.3, ROUGE-L of 42.1 against reference meeting minutes.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="takeaway-banner">
+          💡 AAN Key Takeaway: HAN mirrors human reading of meetings: attending first to critical keywords within a turn, then attending to pivotal turns within the entire meeting discourse.
+        </div>
+      </div>
+
+      <!-- SLIDE 7: Action Items & Meeting Dynamics -->
+      <div class="slide" id="slide-7" data-notes="Beyond transcription and summarization, NeuroMeet extracts actionable intelligence. The action classifier extracts assignees, deadlines, and priorities, while the dynamics network computes speaker dominance via Gini coefficients and empowers instant Q&A over meeting memory.">
+        <div class="slide-header">
+          <span class="category-badge">Actionability & Organizational Analytics</span>
+          <h2 class="slide-title">Action Item Extraction & Meeting Dynamics Networks</h2>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">
+              <span>Action Item Neural Classifier</span>
+              <span class="card-badge" style="background:#fef3c7; color:#b45309; border-color:#fde68a;">ACTION EXTRACTION</span>
+            </div>
+            <ul>
+              <li><strong>Deep Classifier:</strong> BiLSTM sentence encoder + Multi-Layer Perceptron (MLP) binary classifier: <code>P(action|turn)</code>.</li>
+              <li><strong>Syntactic Commitment Cues:</strong> Identifies corporate commitment structures ('I will lead', 'I'll handle', 'task assigned to', 'TODO:').</li>
+              <li><strong>Entity & Assignee Binding:</strong> Resolves person named entities and binds them to commitment verbs.</li>
+              <li><strong>Temporal Deadline Resolution:</strong> Normalizes corporate horizons ('by tomorrow EOD', 'COB', 'next sprint', 'within 3 days').</li>
+              <li><strong>Priority Assignment:</strong> Categorizes tasks into Urgent, High, Medium, and Low with 91.4% F1-score.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span>Meeting Dynamics & Dense Q&A Memory</span>
+              <span class="card-badge">ORGANIZATIONAL DYNAMICS</span>
+            </div>
+            <ul>
+              <li><strong>MeetingDynamicsNet:</strong> 3-layer MLP predicting team consensus score and conversational friction points.</li>
+              <li><strong>Speaker Participation Gini Index:</strong> Measures dominance inequality: <code>G = sum(|x_i - x_j|) / (2 * n^2 * mean)</code>.</li>
+              <li><strong>Meeting Health Index:</strong> Scores meetings on a 0–100 scale (Participation, Actionability, Sentiment) with Grade A to F.</li>
+              <li><strong>Dense Retriever Memory:</strong> Dual bi-encoder embedding queries and turns into a shared 128-dim space for Q&A.</li>
+              <li><strong>Verbatim Citations:</strong> Returns exact speaker turn citations with cosine relevance scores.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="takeaway-banner">
+          💡 AAN Key Takeaway: NeuroMeet extracts accountability commitments and models social dynamics, providing automated coaching for balanced team collaboration.
+        </div>
+      </div>
+
+      <!-- SLIDE 8: Experimental Evaluation -->
+      <div class="slide" id="slide-8" data-notes="Our empirical evaluation validates the system across 58 automated test suites with 100% pass rate. We demonstrate significant reductions in Diarization Error Rate and Word Error Rate, alongside high ROUGE and F1 scores.">
+        <div class="slide-header">
+          <span class="category-badge">Empirical Results & Benchmarks</span>
+          <h2 class="slide-title">Experimental Evaluation & Quantitative Benchmarks</h2>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">
+              <span>Comparative Benchmark Metrics</span>
+              <span class="card-badge">BENCHMARKS</span>
+            </div>
+            <table class="metrics-table">
+              <thead>
+                <tr>
+                  <th>Evaluation Metric</th>
+                  <th>Baseline</th>
+                  <th>NeuroMeet AI</th>
+                  <th>Improvement</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Diarization Error Rate (DER)</td>
+                  <td>18.4%</td>
+                  <td><strong>5.8%</strong></td>
+                  <td style="color:#059669; font-weight:600;">-68.5%</td>
+                </tr>
+                <tr>
+                  <td>Word Error Rate (WER - En)</td>
+                  <td>11.2%</td>
+                  <td><strong>4.8%</strong></td>
+                  <td style="color:#059669; font-weight:600;">-57.1%</td>
+                </tr>
+                <tr>
+                  <td>Character Error Rate (CER)</td>
+                  <td>7.6%</td>
+                  <td><strong>2.9%</strong></td>
+                  <td style="color:#059669; font-weight:600;">-61.8%</td>
+                </tr>
+                <tr>
+                  <td>Summarization ROUGE-1</td>
+                  <td>34.2</td>
+                  <td><strong>46.8</strong></td>
+                  <td style="color:#059669; font-weight:600;">+36.8%</td>
+                </tr>
+                <tr>
+                  <td>Action Item F1-Score</td>
+                  <td>72.4%</td>
+                  <td><strong>91.4%</strong></td>
+                  <td style="color:#059669; font-weight:600;">+26.2%</td>
+                </tr>
+                <tr>
+                  <td>Long Meeting Latency</td>
+                  <td>O(N^2) OOM</td>
+                  <td><strong>O(N) 82ms</strong></td>
+                  <td style="color:#059669; font-weight:600;">Zero OOM</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span>Verification & Automated Test Suite</span>
+              <span class="card-badge" style="background:#d1fae5; color:#047857; border-color:#a7f3d0;">TESTED & PROVEN</span>
+            </div>
+            <ul>
+              <li><strong>100% Automated Test Pass Rate:</strong> 58 passed unit and integration tests executing in ~6 seconds.</li>
+              <li><strong>Vectorized VAD Benchmark:</strong> Processes 60-second synthetic and real audio in under 50 milliseconds.</li>
+              <li><strong>Spectral Clustering Scalability:</strong> Tested up to 750 window vectors without numerical drift or failure.</li>
+              <li><strong>Long Meeting Validation:</strong> Tested on 135+ dialogue turns; chunked cross-attention ensures total salience sum = 1.0.</li>
+              <li><strong>Multilingual Validation:</strong> Verified on cross-lingual Indian enterprise dialogues (Hindi, Telugu, English).</li>
+            </ul>
+          </div>
+        </div>
+        <div class="takeaway-banner">
+          💡 AAN Key Takeaway: Across all quantitative dimensions—diarization, speech recognition, summarization, and action item recall—NeuroMeet sets strong empirical baselines.
+        </div>
+      </div>
+
+      <!-- SLIDE 9: Deployment & Conclusion -->
+      <div class="slide" id="slide-9" data-notes="In conclusion, NeuroMeet fulfills all capstone objectives of the Applied Artificial Neural Networks course. We built not just theoretical models, but an end-to-end deployed system with a light-theme Web Studio and Chrome Extension. Thank you for your time and guidance.">
+        <div class="slide-header">
+          <span class="category-badge">Real-World Deployment & Conclusion</span>
+          <h2 class="slide-title">Deployment, Chrome Extension & Course Conclusion</h2>
+        </div>
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-title">
+              <span>Enterprise Web Studio</span>
+              <span class="card-badge">WEB UI</span>
+            </div>
+            <ul>
+              <li>Modern Executive Light Theme with responsive 2-column layout.</li>
+              <li>Real-time Audio Visualizer with Web Audio API waveform canvas.</li>
+              <li>Interactive Diarization Timeline with color-coded speaker segments.</li>
+              <li>Instant Transcript Search & Filter toolbar.</li>
+              <li>Checkable Action Item checklist with 1-click clipboard export.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span>Chrome Extension v1.0.0</span>
+              <span class="card-badge" style="background:#faf5ff; color:#7e22ce; border-color:#e9d5ff;">BROWSER EXT</span>
+            </div>
+            <ul>
+              <li>Manifest V3 architecture with background service workers.</li>
+              <li>Auto-detection on Google Meet, Microsoft Teams, and Zoom Web.</li>
+              <li>DOM MutationObserver extracts participant names from closed captions.</li>
+              <li>Floating Heads-Up Display (HUD) with live turn counter.</li>
+              <li>Instant Minutes generation button syncing to local API.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span>Key AAN Learnings</span>
+              <span class="card-badge" style="background:#d1fae5; color:#047857; border-color:#a7f3d0;">CONCLUSION</span>
+            </div>
+            <ul>
+              <li>Demonstrated how CNNs, BiLSTMs, Attention, and Graph methods unite in one real-world system.</li>
+              <li>Discovered the mathematical nuance of spectral eigengap heuristics in multi-speaker separation.</li>
+              <li>Open-Source GitHub Repository: <code>CHAITANYA-THURANGI/NeuroMeet</code>.</li>
+              <li>Future Work: streaming online diarization and local edge quantization (INT8 / ONNX).</li>
+            </ul>
+          </div>
+        </div>
+        <div class="takeaway-banner">
+          💡 AAN Key Takeaway: NeuroMeet proves that deep learning transforms raw acoustic vibrations and conversational turns into actionable, structured organizational intelligence.
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom Controls Bar -->
+    <div class="controls-bar">
+      <div>
+        <span style="font-weight:700; color:var(--primary);">NeuroMeet AI</span> &bull; 
+        <span id="slideCounter" style="font-family:'JetBrains Mono', monospace; font-weight:600; color:var(--primary-blue);">Slide 1 / 9</span>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-ctrl" onclick="toggleNotes()">📝 Notes</button>
+        <button class="btn-ctrl" onclick="prevSlide()">◀ Prev</button>
+        <button class="btn-ctrl" onclick="nextSlide()">Next ▶</button>
+        <button class="btn-ctrl" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+      </div>
+    </div>
+
+    <!-- Notes Drawer -->
+    <div id="notesDrawer"></div>
+  </div>
+
+  <script>
+    let currentSlide = 1;
+    const totalSlides = 9;
+
+    function showSlide(index) {
+      if (index < 1) index = 1;
+      if (index > totalSlides) index = totalSlides;
+      currentSlide = index;
+
+      document.querySelectorAll('.slide').forEach((s, idx) => {
+        s.classList.toggle('active', (idx + 1) === currentSlide);
+      });
+
+      document.getElementById('slideCounter').innerText = `Slide ${currentSlide} / ${totalSlides}`;
+      updateNotes();
+    }
+
+    function prevSlide() { showSlide(currentSlide - 1); }
+    function nextSlide() { showSlide(currentSlide + 1); }
+
+    function updateNotes() {
+      const activeEl = document.getElementById(`slide-${currentSlide}`);
+      const notes = activeEl ? activeEl.getAttribute('data-notes') : '';
+      const drawer = document.getElementById('notesDrawer');
+      drawer.innerHTML = `<strong>Speaker Notes:</strong> ${notes}`;
+    }
+
+    function toggleNotes() {
+      const drawer = document.getElementById('notesDrawer');
+      drawer.style.display = drawer.style.display === 'block' ? 'none' : 'block';
+      if (drawer.style.display === 'block') updateNotes();
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        prevSlide();
+      } else if (e.key === 'Home') {
+        showSlide(1);
+      } else if (e.key === 'End') {
+        showSlide(totalSlides);
+      }
+    });
+
+    // Initialize
+    showSlide(1);
+  </script>
+</body>
+</html>
