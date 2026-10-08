@@ -1,0 +1,91 @@
+{
+  "scenario_id": "tech_postmortem_redis",
+  "title": "P0 Incident Post-Mortem \u2014 Auth Cluster 504 Outage",
+  "scenario_type": "Incident Post-Mortem",
+  "speakers": [
+    "David (Site Reliability Lead)",
+    "Sarah (Principal Architect)",
+    "Ken (DevOps Engineer)",
+    "Rachel (VP Engineering)"
+  ],
+  "turns": [
+    {
+      "speaker": "David (Site Reliability Lead)",
+      "start_sec": 0.0,
+      "end_sec": 6.2,
+      "text": "Let's review the incident from yesterday at 14:15 UTC where the user auth cluster experienced 42 minutes of elevated 504 gateway timeouts."
+    },
+    {
+      "speaker": "Sarah (Principal Architect)",
+      "start_sec": 7.0,
+      "end_sec": 14.5,
+      "text": "The root cause was a connection pool leak in the Redis session cache caused by an unhandled TLS handshake retry loop."
+    },
+    {
+      "speaker": "Ken (DevOps Engineer)",
+      "start_sec": 15.0,
+      "end_sec": 21.0,
+      "text": "When CPU spiked to 98%, Kubernetes horizontal pod autoscaling failed to trigger because the metric server crashed simultaneously."
+    },
+    {
+      "speaker": "Rachel (VP Engineering)",
+      "start_sec": 22.0,
+      "end_sec": 27.5,
+      "text": "That's unacceptable for our enterprise SLA. We need hard circuit breakers and independent alerting."
+    },
+    {
+      "speaker": "Sarah (Principal Architect)",
+      "start_sec": 28.0,
+      "end_sec": 34.0,
+      "text": "I will deploy the Redis connection pooling patch with exponential backoff and timeout caps by tonight."
+    },
+    {
+      "speaker": "David (Site Reliability Lead)",
+      "start_sec": 35.0,
+      "end_sec": 41.5,
+      "text": "I will configure external Datadog synthetic monitors bypassing in-cluster metrics by tomorrow noon."
+    },
+    {
+      "speaker": "Ken (DevOps Engineer)",
+      "start_sec": 42.0,
+      "end_sec": 48.0,
+      "text": "I will update the on-call runbook and run a chaos engineering drill on staging by Friday."
+    },
+    {
+      "speaker": "Rachel (VP Engineering)",
+      "start_sec": 49.0,
+      "end_sec": 55.0,
+      "text": "Approved. We agreed to mandate circuit breakers on all external cache dependencies starting immediately."
+    }
+  ],
+  "ground_truth_summary": "The post-mortem analyzed a 42-minute auth service outage caused by a Redis connection pool leak and HPA metrics failure. Sarah committed to patching the Redis connection pooling by tonight, David will set up external synthetic monitors by tomorrow, and Ken will update on-call runbooks and conduct chaos drills by Friday. The team mandated circuit breakers across all cache dependencies.",
+  "ground_truth_decisions": [
+    "Mandate circuit breakers on all external cache dependencies immediately",
+    "Adopt independent external monitoring to eliminate single-point-of-failure metrics"
+  ],
+  "ground_truth_action_items": [
+    {
+      "task": "Deploy Redis connection pooling patch with exponential backoff",
+      "assignee": "Sarah",
+      "deadline": "Tonight",
+      "priority": "urgent"
+    },
+    {
+      "task": "Configure external Datadog synthetic monitors",
+      "assignee": "David",
+      "deadline": "Tomorrow noon",
+      "priority": "high"
+    },
+    {
+      "task": "Update on-call runbook and run chaos drill on staging",
+      "assignee": "Ken",
+      "deadline": "Friday",
+      "priority": "high"
+    }
+  ],
+  "ground_truth_topics": [
+    "Root Cause Analysis",
+    "Autoscaler Infrastructure Failure",
+    "Preventative Hardening Action Plan"
+  ]
+}

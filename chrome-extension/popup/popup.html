@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeuroMeet Assistant</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <div class="header">
+      <div class="title-wrap">
+        <span class="icon">🧠</span>
+        <span class="title">NeuroMeet</span>
+      </div>
+      <span class="status-badge" id="backendBadge">Connecting...</span>
+    </div>
+
+    <div class="card">
+      <div class="stat-row">
+        <span>Captured Turns:</span>
+        <strong id="turnCounter">0</strong>
+      </div>
+      <div class="stat-row">
+        <span>Active Platform:</span>
+        <strong id="platformName">Scanning...</strong>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" id="summarizeBtn">⚡ Summarize Now</button>
+      <button class="btn btn-secondary" id="openStudioBtn">Open Web Studio</button>
+    </div>
+
+    <div id="quickResult" class="result-box" style="display:none;">
+      <div class="res-title">Summary Preview:</div>
+      <div class="res-body" id="summaryPreview"></div>
+    </div>
+
+    <div class="footer">
+      Powered by NeuroMeet Deep Learning
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeuroMeet AI — Deep Learning Meeting Assistant</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+  <style>
+    :root {
+      --bg-dark: #0a0f1d;
+      --bg-card: #131d31;
+      --bg-card-hover: #1a2742;
+      --border-color: #233554;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --accent-blue: #38bdf8;
+      --accent-indigo: #6366f1;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --spk-1: #38bdf8;
+      --spk-2: #a855f7;
+      --spk-3: #10b981;
+      --spk-4: #f59e0b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; }
+    body { background: var(--bg-dark); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+
+    /* Header */
+    header { background: rgba(19, 29, 49, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-color); padding: 14px 28px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 50; }
+    .logo-group { display: flex; align-items: center; gap: 12px; }
+    .logo-icon { font-size: 26px; }
+    .logo-title { font-size: 20px; font-weight: 700; background: linear-gradient(135deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .logo-badge { font-size: 11px; background: rgba(56, 189, 248, 0.15); color: var(--accent-blue); padding: 2px 8px; border-radius: 12px; border: 1px solid rgba(56, 189, 248, 0.3); font-weight: 600; }
+    .header-actions { display: flex; align-items: center; gap: 16px; }
+    .status-pill { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); background: rgba(255, 255, 255, 0.05); padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border-color); }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-emerald); box-shadow: 0 0 8px var(--accent-emerald); }
+    .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); padding: 6px 14px; border-radius: 6px; font-size: 13px; cursor: pointer; transition: all 0.2s; text-decoration: none; }
+    .btn-ghost:hover { background: var(--bg-card-hover); color: var(--text-main); }
+
+    /* Main Container */
+    main { flex: 1; padding: 24px; max-width: 1600px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 20px; }
+
+    /* Control Toolbar */
+    .toolbar-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 18px 24px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; }
+    .scenario-picker { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .scenario-label { font-size: 13px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .btn-scenario { background: rgba(255, 255, 255, 0.04); color: var(--text-main); border: 1px solid var(--border-color); padding: 8px 14px; border-radius: 8px; font-size: 13px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+    .btn-scenario:hover, .btn-scenario.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent-blue); color: var(--accent-blue); }
+    .action-controls { display: flex; align-items: center; gap: 10px; }
+    .btn-record { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
+    .btn-record:hover { filter: brightness(1.1); }
+    .btn-record.recording { animation: pulse-red 1.5s infinite; }
+    @keyframes pulse-red { 0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 50% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } }
+    .btn-upload { background: var(--bg-card-hover); color: var(--text-main); border: 1px solid var(--border-color); padding: 9px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; }
+    .btn-upload:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+
+    /* Audio Visualizer & Waveform */
+    #visualizer-panel { display: none; background: #0c1424; border: 1px solid var(--border-color); border-radius: 10px; padding: 14px; align-items: center; gap: 16px; }
+    #waveCanvas { flex: 1; height: 50px; background: #070d18; border-radius: 6px; }
+    .timer-badge { font-family: monospace; font-size: 16px; font-weight: bold; color: var(--accent-rose); min-width: 60px; }
+
+    /* 2-Column Grid Layout */
+    .dashboard-grid { display: grid; grid-template-columns: 1fr 480px; gap: 20px; flex: 1; }
+    @media (max-width: 1200px) { .dashboard-grid { grid-template-columns: 1fr; } }
+
+    /* Cards */
+    .card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+    .card-header { padding: 16px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.01); }
+    .card-title { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; color: var(--text-main); }
+    .card-body { padding: 20px; flex: 1; overflow-y: auto; }
+
+    /* Diarization Timeline */
+    .diarization-bar { display: flex; height: 32px; border-radius: 6px; overflow: hidden; margin-bottom: 14px; background: #070d18; border: 1px solid var(--border-color); }
+    .diar-segment { height: 100%; transition: opacity 0.2s; cursor: pointer; position: relative; }
+    .diar-segment:hover { opacity: 0.8; }
+    .timeline-legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; margin-bottom: 18px; }
+    .legend-item { display: flex; align-items: center; gap: 6px; color: var(--text-muted); }
+    .legend-color { width: 12px; height: 12px; border-radius: 3px; }
+
+    /* Transcript Feed */
+    .transcript-feed { display: flex; flex-direction: column; gap: 12px; max-height: 540px; overflow-y: auto; padding-right: 6px; }
+    .turn-card { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px; transition: all 0.2s; }
+    .turn-card:hover { border-color: rgba(56, 189, 248, 0.4); background: rgba(255, 255, 255, 0.04); }
+    .turn-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .turn-speaker { font-weight: 600; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+    .speaker-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .turn-meta { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
+    .turn-text { font-size: 14px; color: #cbd5e1; line-height: 1.5; }
+    .turn-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; font-weight: 600; }
+    .tag-positive { background: rgba(16, 185, 129, 0.2); color: var(--accent-emerald); }
+    .tag-negative { background: rgba(244, 63, 94, 0.2); color: var(--accent-rose); }
+    .tag-neutral { background: rgba(148, 163, 184, 0.2); color: var(--text-muted); }
+
+    /* Q&A Assistant Drawer */
+    .qa-box { margin-top: 18px; border-top: 1px solid var(--border-color); padding-top: 16px; }
+    .qa-input-group { display: flex; gap: 8px; margin-bottom: 12px; }
+    .qa-input { flex: 1; background: #070d18; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 14px; color: var(--text-main); font-size: 13px; outline: none; }
+    .qa-input:focus { border-color: var(--accent-blue); }
+    .btn-qa { background: var(--accent-indigo); color: white; border: none; padding: 0 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .qa-result-card { display: none; background: #0c1424; border: 1px solid rgba(99, 102, 241, 0.4); border-radius: 8px; padding: 14px; font-size: 13px; }
+    .qa-answer { color: #e2e8f0; margin-bottom: 10px; line-height: 1.4; }
+    .qa-citation { font-size: 11px; color: var(--text-muted); border-left: 2px solid var(--accent-indigo); padding-left: 8px; }
+
+    /* Right Column: Tabbed Intelligence Panel */
+    .tabs-header { display: flex; background: rgba(255, 255, 255, 0.02); border-bottom: 1px solid var(--border-color); }
+    .tab-btn { flex: 1; padding: 12px 10px; background: transparent; border: none; color: var(--text-muted); font-size: 12px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; text-align: center; }
+    .tab-btn.active { color: var(--accent-blue); border-bottom-color: var(--accent-blue); background: rgba(56, 189, 248, 0.05); }
+
+    /* Summary Tab */
+    .summary-section { margin-bottom: 20px; }
+    .summary-heading { font-size: 12px; font-weight: 700; color: var(--accent-blue); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
+    .summary-text { font-size: 14px; color: #cbd5e1; line-height: 1.6; }
+    .decisions-list { display: flex; flex-direction: column; gap: 8px; }
+    .decision-item { background: rgba(56, 189, 248, 0.06); border-left: 3px solid var(--accent-blue); padding: 10px 12px; font-size: 13px; border-radius: 0 6px 6px 0; }
+    .topic-badges { display: flex; flex-wrap: wrap; gap: 6px; }
+    .topic-pill { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); padding: 4px 10px; border-radius: 20px; font-size: 12px; color: var(--text-muted); }
+
+    /* Action Items Tab */
+    .actions-list { display: flex; flex-direction: column; gap: 10px; }
+    .action-row { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .action-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+    .action-checkbox-group { display: flex; align-items: flex-start; gap: 10px; flex: 1; }
+    .action-task { font-size: 13px; font-weight: 600; color: #f1f5f9; line-height: 1.4; }
+    .action-meta { display: flex; gap: 10px; font-size: 11px; color: var(--text-muted); }
+    .prio-badge { padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+    .prio-urgent { background: rgba(244, 63, 94, 0.2); color: var(--accent-rose); border: 1px solid rgba(244, 63, 94, 0.3); }
+    .prio-high { background: rgba(245, 158, 11, 0.2); color: var(--accent-amber); border: 1px solid rgba(245, 158, 11, 0.3); }
+    .prio-medium { background: rgba(56, 189, 248, 0.2); color: var(--accent-blue); border: 1px solid rgba(56, 189, 248, 0.3); }
+    .prio-low { background: rgba(16, 185, 129, 0.2); color: var(--accent-emerald); border: 1px solid rgba(16, 185, 129, 0.3); }
+
+    /* Analytics Tab */
+    .health-score-card { background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(99, 102, 241, 0.1)); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 10px; padding: 18px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .score-circle { width: 68px; height: 68px; border-radius: 50%; border: 4px solid var(--accent-blue); display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 800; font-size: 22px; color: var(--accent-blue); }
+    .score-label { font-size: 9px; color: var(--text-muted); }
+    .analytics-section { margin-bottom: 20px; }
+    .talktime-bars { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+    .talktime-row { display: flex; align-items: center; gap: 10px; font-size: 12px; }
+    .talktime-name { width: 110px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-muted); }
+    .talktime-bar-bg { flex: 1; height: 10px; background: #070d18; border-radius: 5px; overflow: hidden; }
+    .talktime-bar-fill { height: 100%; border-radius: 5px; }
+    .talktime-pct { width: 40px; text-align: right; font-weight: 600; color: #f1f5f9; }
+
+    /* Export Bar */
+    .export-bar { display: flex; gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-color); }
+    .btn-export { flex: 1; background: rgba(255, 255, 255, 0.05); color: var(--text-main); border: 1px solid var(--border-color); padding: 8px; border-radius: 6px; font-size: 12px; cursor: pointer; text-align: center; transition: 0.2s; }
+    .btn-export:hover { background: var(--bg-card-hover); border-color: var(--accent-blue); color: var(--accent-blue); }
+
+    /* Modal / Paste transcript */
+    #transcriptModal { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); z-index: 100; align-items: center; justify-content: center; }
+    .modal-content { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; width: 90%; max-width: 600px; padding: 24px; display: flex; flex-direction: column; gap: 14px; }
+    .modal-textarea { width: 100%; height: 200px; background: #070d18; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; color: var(--text-main); font-size: 13px; resize: vertical; }
+
+    /* Footer */
+    footer { border-top: 1px solid var(--border-color); padding: 14px 28px; text-align: center; font-size: 12px; color: var(--text-muted); background: rgba(19, 29, 49, 0.6); }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="logo-group">
+      <span class="logo-icon">🧠</span>
+      <div>
+        <div class="logo-title">NeuroMeet AI</div>
+        <div style="font-size: 11px; color: var(--text-muted);">Deep Learning Meeting Intelligence Studio</div>
+      </div>
+      <span class="logo-badge">v1.0.0</span>
+    </div>
+    <div class="header-actions">
+      <div class="status-pill">
+        <div class="status-dot"></div>
+        <span id="systemStatus">PyTorch & Models Ready</span>
+      </div>
+      <a href="/docs" target="_blank" class="btn-ghost">API Docs</a>
+      <button class="btn-ghost" onclick="openTranscriptModal()">Paste Transcript</button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+    <!-- Scenario & Recording Toolbar -->
+    <div class="toolbar-card">
+      <div class="scenario-picker">
+        <span class="scenario-label">Quick Scenarios:</span>
+        <button class="btn-scenario active" onclick="loadScenario('sprint_planning')">⚡ Sprint Planning</button>
+        <button class="btn-scenario" onclick="loadScenario('tech_postmortem')">🚨 Post-Mortem Outage</button>
+        <button class="btn-scenario" onclick="loadScenario('board_strategy')">🏢 Executive Board</button>
+        <button class="btn-scenario" onclick="loadScenario('client_discovery')">🤝 Client Discovery</button>
+      </div>
+      <div class="action-controls">
+        <button id="recordBtn" class="btn-record" onclick="toggleRecording()">
+          <span>🎙️</span> <span id="recordBtnText">Record Meeting</span>
+        </button>
+        <label class="btn-upload">
+          📂 Upload Audio
+          <input type="file" id="audioUploadInput" accept="audio/*" style="display:none;" onchange="handleAudioUpload(event)">
+        </label>
+      </div>
+    </div>
+
+    <!-- Live Audio Visualizer -->
+    <div id="visualizer-panel">
+      <span class="timer-badge" id="recordTimer">00:00</span>
+      <canvas id="waveCanvas"></canvas>
+      <span style="font-size: 12px; color: var(--text-muted);">Live speech stream processing via Web Audio API...</span>
+    </div>
+
+    <!-- Dashboard 2-Column Grid -->
+    <div class="dashboard-grid">
+      <!-- Left Column: Diarization & Transcript Feed -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🗣️</span>
+            <span id="meetingTitle">Sprint 42 Planning — Stripe v3 Migration</span>
+          </div>
+          <span style="font-size: 12px; color: var(--text-muted);" id="turnCountBadge">8 Turns</span>
+        </div>
+        <div class="card-body">
+          <!-- Diarization Timeline Bar -->
+          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 6px;">Speaker Diarization Timeline (Interactive)</div>
+          <div class="diarization-bar" id="diarizationTimeline"></div>
+          <div class="timeline-legend" id="timelineLegend"></div>
+
+          <!-- Transcript Scroll Feed -->
+          <div class="transcript-feed" id="transcriptFeed"></div>
+
+          <!-- Q&A Assistant -->
+          <div class="qa-box">
+            <div style="font-size: 12px; font-weight: 700; color: var(--accent-indigo); margin-bottom: 8px;">🤖 AI Meeting Q&A Assistant</div>
+            <div class="qa-input-group">
+              <input type="text" id="qaInput" class="qa-input" placeholder="Ask anything (e.g. 'Who is fixing the webhook?', 'What was decided?')" onkeydown="if(event.key==='Enter')askQuestion()">
+              <button class="btn-qa" onclick="askQuestion()">Ask</button>
+            </div>
+            <div id="qaResult" class="qa-result-card">
+              <div id="qaAnswer" class="qa-answer"></div>
+              <div id="qaCitation" class="qa-citation"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Tabs (Summary, Action Items, Analytics) -->
+      <div class="card">
+        <div class="tabs-header">
+          <button class="tab-btn active" onclick="switchTab('summary')">🎯 Summary & Decisions</button>
+          <button class="tab-btn" onclick="switchTab('actions')">📋 Action Items (<span id="actionBadge">3</span>)</button>
+          <button class="tab-btn" onclick="switchTab('analytics')">📊 Health & Dynamics</button>
+        </div>
+        <div class="card-body">
+
+          <!-- Tab 1: Summary -->
+          <div id="tab-summary">
+            <div class="summary-section">
+              <div class="summary-heading">Executive TL;DR</div>
+              <p class="summary-text" id="execSummaryText">Loading summary...</p>
+            </div>
+            <div class="summary-section">
+              <div class="summary-heading">Key Decisions Agreed</div>
+              <div class="decisions-list" id="decisionsList"></div>
+            </div>
+            <div class="summary-section">
+              <div class="summary-heading">Discussion Topics</div>
+              <div class="topic-badges" id="topicsList"></div>
+            </div>
+          </div>
+
+          <!-- Tab 2: Action Items -->
+          <div id="tab-actions" style="display: none;">
+            <div class="actions-list" id="actionItemsList"></div>
+          </div>
+
+          <!-- Tab 3: Analytics & Health -->
+          <div id="tab-analytics" style="display: none;">
+            <div class="health-score-card">
+              <div>
+                <div style="font-size: 12px; color: var(--accent-blue); font-weight: bold;">MEETING HEALTH SCORE</div>
+                <div id="healthCategory" style="font-size: 15px; font-weight: 700; color: #f1f5f9; margin: 4px 0;">Highly Productive</div>
+                <div id="healthSubscores" style="font-size: 11px; color: var(--text-muted);">Participation: 22/25 | Actionability: 32/35</div>
+              </div>
+              <div class="score-circle">
+                <span id="healthScoreNum">94</span>
+                <span class="score-label" id="healthGrade">GRADE A+</span>
+              </div>
+            </div>
+
+            <div class="analytics-section">
+              <div class="summary-heading">Talk-Time Distribution</div>
+              <div class="talktime-bars" id="talktimeBars"></div>
+            </div>
+
+            <div class="analytics-section">
+              <div class="summary-heading">AI Coach Recommendations</div>
+              <ul id="coachRecs" style="font-size: 13px; color: #cbd5e1; padding-left: 18px; line-height: 1.5;"></ul>
+            </div>
+          </div>
+
+          <!-- Export Actions -->
+          <div class="export-bar">
+            <button class="btn-export" onclick="exportData('markdown')">📄 Markdown</button>
+            <button class="btn-export" onclick="exportData('html')">🖨️ HTML Report</button>
+            <button class="btn-export" onclick="exportData('json')">📦 JSON Data</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal: Paste Transcript -->
+  <div id="transcriptModal">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="font-size:16px;">Paste Meeting Transcript</h3>
+        <button style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;" onclick="closeTranscriptModal()">&times;</button>
+      </div>
+      <input type="text" id="customTitleInput" class="qa-input" placeholder="Meeting Title (e.g., Q3 Strategy Review)">
+      <textarea id="customTranscriptInput" class="modal-textarea" placeholder="Paste dialogue here... Format:
+Alice: We agreed to launch the beta next month.
+Bob: I will handle the database deployment by Friday.
+Charlie: Excellent, let's keep to this schedule."></textarea>
+      <div style="display:flex; justify-content:flex-end; gap:8px;">
+        <button class="btn-ghost" onclick="closeTranscriptModal()">Cancel</button>
+        <button class="btn-qa" onclick="submitCustomTranscript()">Analyze Meeting</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    NeuroMeet AI &copy; 2026. Built with PyTorch, Conformer ASR, ECAPA-TDNN Diarization, and Hierarchical Attention Summarization.
+  </footer>
+
+  <!-- Script -->
+  <script>
+    let currentMeetingData = null;
+    let isRecording = false;
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let audioContext = null;
+    let analyser = null;
+    let animationId = null;
+    let recordStartTime = 0;
+    let timerInterval = null;
+
+    const speakerColors = ["#38bdf8", "#a855f7", "#10b981", "#f59e0b", "#ec4899", "#6366f1"];
+
+    // Initialize
+    window.addEventListener("DOMContentLoaded", () => {
+      loadScenario('sprint_planning');
+    });
+
+    async function loadScenario(id) {
+      document.querySelectorAll(".btn-scenario").forEach(b => b.classList.remove("active"));
+      event?.target?.classList.add("active");
+
+      try {
+        const res = await fetch(`/api/v1/meetings/sample/${id}`);
+        if (!res.ok) throw new Error("Failed to load scenario");
+        const data = await res.json();
+        renderMeeting(data);
+      } catch (err) {
+        console.error("API Error, falling back to simulated scenario:", err);
+      }
+    }
+
+    function renderMeeting(data) {
+      currentMeetingData = data;
+      document.getElementById("meetingTitle").innerText = data.title;
+      document.getElementById("turnCountBadge").innerText = `${data.turns.length} Turns`;
+
+      // 1. Render Diarization Timeline
+      renderDiarization(data.turns);
+
+      // 2. Render Transcript Feed
+      renderTranscript(data.turns);
+
+      // 3. Render Executive Summary & Decisions
+      document.getElementById("execSummaryText").innerText = data.minutes.executive_summary;
+      const decList = document.getElementById("decisionsList");
+      decList.innerHTML = data.minutes.key_decisions.map(d => `<div class="decision-item">📌 ${d}</div>`).join("");
+
+      const topList = document.getElementById("topicsList");
+      topList.innerHTML = data.minutes.discussion_topics.map(t => `<span class="topic-pill">🏷️ ${t}</span>`).join("");
+
+      // 4. Render Action Items
+      document.getElementById("actionBadge").innerText = data.action_items.length;
+      const actList = document.getElementById("actionItemsList");
+      actList.innerHTML = data.action_items.map(a => `
+        <div class="action-row">
+          <div class="action-top">
+            <div class="action-checkbox-group">
+              <input type="checkbox" style="margin-top:3px; cursor:pointer;">
+              <span class="action-task">${a.task}</span>
+            </div>
+            <span class="prio-badge prio-${a.priority.toLowerCase()}">${a.priority}</span>
+          </div>
+          <div class="action-meta">
+            <span>👤 <strong>${a.assignee}</strong></span>
+            <span>📅 Due: ${a.deadline}</span>
+          </div>
+        </div>
+      `).join("");
+
+      // 5. Render Health & Analytics
+      const h = data.health;
+      document.getElementById("healthScoreNum").innerText = h.overall_score;
+      document.getElementById("healthGrade").innerText = `GRADE ${h.grade}`;
+      document.getElementById("healthCategory").innerText = h.category;
+      document.getElementById("healthSubscores").innerText = `Participation: ${h.participation_subscore}/25 | Actionability: ${h.actionability_subscore}/35 | Sentiment: ${h.sentiment_subscore}/25`;
+
+      const recs = document.getElementById("coachRecs");
+      recs.innerHTML = h.recommendations.map(r => `<li>${r}</li>`).join("");
+
+      // Talk time bars
+      const part = data.participation;
+      const bars = document.getElementById("talktimeBars");
+      bars.innerHTML = Object.entries(part.talk_time_percentages).map(([spk, pct], i) => `
+        <div class="talktime-row">
+          <span class="talktime-name" title="${spk}">${spk}</span>
+          <div class="talktime-bar-bg">
+            <div class="talktime-bar-fill" style="width: ${pct}%; background: ${speakerColors[i % speakerColors.length]};"></div>
+          </div>
+          <span class="talktime-pct">${pct}%</span>
+        </div>
+      `).join("");
+    }
+
+    function renderDiarization(turns) {
+      const container = document.getElementById("diarizationTimeline");
+      const legend = document.getElementById("timelineLegend");
+      container.innerHTML = "";
+      legend.innerHTML = "";
+
+      const uniqueSpeakers = [...new Set(turns.map(t => t.speaker))];
+      const spkColorMap = {};
+      uniqueSpeakers.forEach((spk, idx) => {
+        spkColorMap[spk] = speakerColors[idx % speakerColors.length];
+      });
+
+      legend.innerHTML = uniqueSpeakers.map(spk => `
+        <div class="legend-item">
+          <div class="legend-color" style="background: ${spkColorMap[spk]}"></div>
+          <span>${spk}</span>
+        </div>
+      `).join("");
+
+      const totalDur = turns.reduce((acc, t) => acc + (t.duration_sec || 2.0), 0) || 1.0;
+      turns.forEach((t, i) => {
+        const dur = t.duration_sec || 2.0;
+        const pct = (dur / totalDur) * 100.0;
+        const color = spkColorMap[t.speaker] || "#38bdf8";
+        const div = document.createElement("div");
+        div.className = "diar-segment";
+        div.style.width = `${pct}%`;
+        div.style.background = color;
+        div.title = `${t.speaker}: ${dur.toFixed(1)}s`;
+        div.onclick = () => highlightTurn(i);
+        container.appendChild(div);
+      });
+    }
+
+    function renderTranscript(turns) {
+      const feed = document.getElementById("transcriptFeed");
+      const uniqueSpeakers = [...new Set(turns.map(t => t.speaker))];
+      const spkColorMap = {};
+      uniqueSpeakers.forEach((spk, idx) => {
+        spkColorMap[spk] = speakerColors[idx % speakerColors.length];
+      });
+
+      feed.innerHTML = turns.map((t, idx) => {
+        const color = spkColorMap[t.speaker] || "#38bdf8";
+        return `
+          <div class="turn-card" id="turn-${idx}">
+            <div class="turn-header">
+              <div class="turn-speaker" style="color:${color}">
+                <div class="speaker-dot" style="background:${color}"></div>
+                <span>${t.speaker}</span>
+              </div>
+              <div class="turn-meta">
+                <span>#${idx + 1}</span>
+                <span>${t.start_sec !== null && t.start_sec !== undefined ? t.start_sec.toFixed(1) + 's' : ''}</span>
+              </div>
+            </div>
+            <div class="turn-text">${t.text}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function highlightTurn(idx) {
+      const el = document.getElementById(`turn-${idx}`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.style.borderColor = "var(--accent-blue)";
+        el.style.background = "rgba(56, 189, 248, 0.15)";
+        setTimeout(() => {
+          el.style.borderColor = "var(--border-color)";
+          el.style.background = "rgba(255, 255, 255, 0.02)";
+        }, 1500);
+      }
+    }
+
+    function switchTab(name) {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      event.target.classList.add("active");
+      document.getElementById("tab-summary").style.display = name === "summary" ? "block" : "none";
+      document.getElementById("tab-actions").style.display = name === "actions" ? "block" : "none";
+      document.getElementById("tab-analytics").style.display = name === "analytics" ? "block" : "none";
+    }
+
+    async function askQuestion() {
+      const input = document.getElementById("qaInput");
+      const query = input.value.trim();
+      if (!query || !currentMeetingData) return;
+
+      const resBox = document.getElementById("qaResult");
+      const ansEl = document.getElementById("qaAnswer");
+      const citEl = document.getElementById("qaCitation");
+      resBox.style.display = "block";
+      ansEl.innerText = "Consulting neural meeting memory...";
+      citEl.innerText = "";
+
+      try {
+        const res = await fetch("/api/v1/meetings/qa", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: query, turns: currentMeetingData.turns }),
+        });
+        const data = await res.json();
+        ansEl.innerText = data.answer;
+        if (data.citations && data.citations.length > 0) {
+          const c = data.citations[0];
+          citEl.innerText = `Citation: Turn #${c.turn_index + 1} (${c.speaker}) — Relevance: ${(c.score * 100).toFixed(0)}%`;
+        }
+      } catch (e) {
+        ansEl.innerText = "Error answering question.";
+      }
+    }
+
+    // Live Recording
+    async function toggleRecording() {
+      const btn = document.getElementById("recordBtn");
+      const text = document.getElementById("recordBtnText");
+      const panel = document.getElementById("visualizer-panel");
+
+      if (!isRecording) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          const source = audioContext.createMediaStreamSource(stream);
+          analyser = audioContext.createAnalyser();
+          analyser.fftSize = 256;
+          source.connect(analyser);
+
+          mediaRecorder = new MediaRecorder(stream);
+          audioChunks = [];
+          mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+          mediaRecorder.onstop = uploadRecordedAudio;
+          mediaRecorder.start();
+
+          isRecording = true;
+          btn.classList.add("recording");
+          text.innerText = "Stop Recording";
+          panel.style.display = "flex";
+          recordStartTime = Date.now();
+          timerInterval = setInterval(updateTimer, 1000);
+          drawWaveform();
+        } catch (err) {
+          alert("Microphone access denied or unsupported in browser: " + err.message);
+        }
+      } else {
+        isRecording = false;
+        mediaRecorder.stop();
+        btn.classList.remove("recording");
+        text.innerText = "Record Meeting";
+        panel.style.display = "none";
+        clearInterval(timerInterval);
+        cancelAnimationFrame(animationId);
+      }
+    }
+
+    function updateTimer() {
+      const diff = Math.floor((Date.now() - recordStartTime) / 1000);
+      const m = String(Math.floor(diff / 60)).padStart(2, "0");
+      const s = String(diff % 60).padStart(2, "0");
+      document.getElementById("recordTimer").innerText = `${m}:${s}`;
+    }
+
+    function drawWaveform() {
+      if (!isRecording || !analyser) return;
+      const canvas = document.getElementById("waveCanvas");
+      const ctx = canvas.getContext("2d");
+      const bufferLen = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLen);
+      analyser.getByteFrequencyData(dataArray);
+
+      ctx.fillStyle = "#070d18";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const barWidth = (canvas.width / bufferLen) * 2.5;
+      let x = 0;
+      for (let i = 0; i < bufferLen; i++) {
+        const barHeight = (dataArray[i] / 255) * canvas.height;
+        ctx.fillStyle = "#38bdf8";
+        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+        x += barWidth + 1;
+      }
+      animationId = requestAnimationFrame(drawWaveform);
+    }
+
+    async function uploadRecordedAudio() {
+      const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+      const formData = new FormData();
+      formData.append("file", audioBlob, "recording.wav");
+      formData.append("title", "Live Recorded Meeting Session");
+
+      document.getElementById("systemStatus").innerText = "Diarizing & Transcribing Live Audio...";
+      try {
+        const res = await fetch("/api/v1/meetings/process-audio", { method: "POST", body: formData });
+        const data = await res.json();
+        renderMeeting(data);
+        document.getElementById("systemStatus").innerText = "Live Audio Processed Successfully";
+      } catch (err) {
+        alert("Failed to analyze audio stream: " + err.message);
+      }
+    }
+
+    async function handleAudioUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("title", file.name);
+
+      document.getElementById("systemStatus").innerText = "Analyzing Uploaded Audio...";
+      try {
+        const res = await fetch("/api/v1/meetings/process-audio", { method: "POST", body: formData });
+        const data = await res.json();
+        renderMeeting(data);
+        document.getElementById("systemStatus").innerText = "Audio File Ready";
+      } catch (err) {
+        alert("Audio processing failed: " + err.message);
+      }
+    }
+
+    function openTranscriptModal() { document.getElementById("transcriptModal").style.display = "flex"; }
+    function closeTranscriptModal() { document.getElementById("transcriptModal").style.display = "none"; }
+
+    async function submitCustomTranscript() {
+      const title = document.getElementById("customTitleInput").value.trim() || "Custom Meeting Session";
+      const text = document.getElementById("customTranscriptInput").value.trim();
+      if (!text) return;
+      closeTranscriptModal();
+
+      document.getElementById("systemStatus").innerText = "Processing Neural Meeting Intelligence...";
+      try {
+        const res = await fetch("/api/v1/meetings/process-transcript", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, transcript: text }),
+        });
+        const data = await res.json();
+        renderMeeting(data);
+        document.getElementById("systemStatus").innerText = "Meeting Intelligence Ready";
+      } catch (e) {
+        alert("Error processing transcript: " + e.message);
+      }
+    }
+
+    async function exportData(format) {
+      if (!currentMeetingData) return;
+      try {
+        const res = await fetch("/api/v1/meetings/export", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ meeting_data: currentMeetingData, format: format }),
+        });
+        const data = await res.json();
+        const blob = new Blob([data.content], { type: format === "html" ? "text/html" : "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = data.filename;
+        a.click();
+      } catch (e) {
+        alert("Export failed: " + e.message);
+      }
+    }
+  </script>
+</body>
+</html>

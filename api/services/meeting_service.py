@@ -1,0 +1,127 @@
+"""Meeting orchestrator and formatting service."""
+
+from __future__ import annotations
+import json
+from typing import Any, Dict, List, Optional
+from .model_registry import get_pipeline
+from src.datasets.generator import generate_meeting_scenarios, MeetingScenario
+from src.pipeline.omni_meeting import MeetingProcessingResult
+
+
+class MeetingService:
+    """Provides high-level meeting operations and export generation."""
+
+    def __init__(self) -> None:
+        self.pipeline = get_pipeline()
+        self._cached_scenarios = generate_meeting_scenarios()
+
+    def get_sample_scenarios_list(self) -> List[Dict[str, Any]]:
+        """Returns metadata list of available pre-packaged meeting scenarios."""
+        return [
+            {
+                "id": sc.scenario_id,
+                "title": sc.title,
+                "type": sc.scenario_type,
+                "speakers_count": len(sc.speakers),
+                "turns_count": len(sc.turns),
+                "duration_sec": sc.turns[-1]["end_sec"] if sc.turns else 0.0,
+            }
+            for sc in self._cached_scenarios.values()
+        ]
+
+    def get_scenario_by_id(self, scenario_id: str) -> Optional[MeetingScenario]:
+        """Fetches scenario by id or dictionary key."""
+        if scenario_id in self._cached_scenarios:
+            return self._cached_scenarios[scenario_id]
+        for sc in self._cached_scenarios.values():
+            if sc.scenario_id == scenario_id:
+                return sc
+        return None
+
+    def process_scenario_by_id(self, scenario_id: str) -> Optional[MeetingProcessingResult]:
+        """Runs the complete OmniMeeting pipeline on a pre-packaged scenario."""
+        sc = self.get_scenario_by_id(scenario_id)
+        if not sc:
+            return None
+        return self.pipeline.process_transcript(sc.turns, title=sc.title)
+
+    def generate_html_export(self, result_dict: Dict[str, Any]) -> str:
+        """Renders self-contained printable executive HTML meeting minutes."""
+        title = result_dict.get("title", "Meeting Minutes")
+        mins = result_dict.get("minutes", {})
+        actions = result_dict.get("action_items", [])
+        health = result_dict.get("health", {})
+        turns = result_dict.get("turns", [])
+
+        action_rows = "".join([
+            f"<tr><td><span class='badge {a.get('priority','medium')}'>{a.get('priority','').upper()}</span></td>"
+            f"<td><strong>{a.get('task','')}</strong></td>"
+            f"<td>{a.get('assignee','')}</td>"
+            f"<td>{a.get('deadline','')}</td></tr>"
+            for a in actions
+        ])
+
+        decisions_list = "".join([f"<li>📌 {d}</li>" for d in mins.get("key_decisions", [])])
+        topics_list = "".join([f"<span class='topic-tag'>{t}</span>" for t in mins.get("discussion_topics", [])])
+        recs_list = "".join([f"<li>💡 {r}</li>" for r in health.get("recommendations", [])])
+
+        transcript_rows = "".join([
+            f"<div class='turn'><strong>{t.get('speaker','')}:</strong> {t.get('text','')}</div>"
+            for t in turns
+        ])
+
+        html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>{title} — NeuroMeet Report</title>
+<style>
+  body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #f8fafc; padding: 40px; margin: 0; line-height: 1.6; }}
+  .container {{ max-width: 900px; margin: 0 auto; background: #1e293b; border-radius: 12px; padding: 36px; border: 1px solid #334155; box-shadow: 0 10px 25px rgba(0,0,0,0.4); }}
+  h1 {{ font-size: 26px; color: #38bdf8; margin-top: 0; }}
+  .meta {{ color: #94a3b8; font-size: 14px; margin-bottom: 24px; border-bottom: 1px solid #334155; padding-bottom: 12px; }}
+  .badge {{ display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase; }}
+  .badge.urgent {{ background: #ef4444; color: white; }}
+  .badge.high {{ background: #f97316; color: white; }}
+  .badge.medium {{ background: #3b82f6; color: white; }}
+  .badge.low {{ background: #10b981; color: white; }}
+  .topic-tag {{ display: inline-block; background: #334155; color: #cbd5e1; padding: 4px 10px; border-radius: 20px; font-size: 12px; margin-right: 6px; margin-bottom: 6px; }}
+  table {{ width: 100%; border-collapse: collapse; margin-top: 12px; }}
+  th, td {{ text-align: left; padding: 10px; border-bottom: 1px solid #334155; font-size: 14px; }}
+  th {{ background: #0f172a; color: #94a3b8; font-weight: 600; }}
+  .turn {{ margin-bottom: 8px; font-size: 14px; color: #cbd5e1; }}
+  .health-pill {{ background: #0284c7; color: white; padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; float: right; }}
+</style>
+</head>
+<body>
+<div class="container">
+  <span class="health-pill">Health Score: {health.get('overall_score', 85)}/100 ({health.get('grade', 'A')})</span>
+  <h1>{title}</h1>
+  <div class="meta">Generated by <strong>NeuroMeet AI</strong> | Deep Learning Meeting Assistant</div>
+  
+  <h3>1. Executive Summary</h3>
+  <p>{mins.get('executive_summary', '')}</p>
+
+  <h3>2. Key Decisions</h3>
+  <ul>{decisions_list or '<li>None documented</li>'}</ul>
+
+  <h3>3. Discussion Topics</h3>
+  <div>{topics_list}</div>
+
+  <h3>4. Action Items & Commitments</h3>
+  <table>
+    <thead><tr><th>Priority</th><th>Task</th><th>Assignee</th><th>Deadline</th></tr></thead>
+    <tbody>{action_rows or '<tr><td colspan="4">No action items detected.</td></tr>'}</tbody>
+  </table>
+
+  <h3>5. Meeting Coaching & Recommendations</h3>
+  <ul>{recs_list}</ul>
+
+  <h3>6. Transcript Record</h3>
+  <div style="max-height: 300px; overflow-y: auto; background: #0f172a; padding: 16px; border-radius: 8px;">
+    {transcript_rows}
+  </div>
+</div>
+</body>
+</html>"""
+        return html

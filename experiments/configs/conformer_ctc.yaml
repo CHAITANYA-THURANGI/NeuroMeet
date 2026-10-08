@@ -1,0 +1,14 @@
+# Experiment: Conformer-BiGRU CTC Acoustic Model
+name: conformer_ctc
+description: "Macaron-style Conformer blocks with depthwise convolutions and CTC loss"
+model:
+  input_dim: 80
+  d_model: 144
+  n_conformer_blocks: 4
+  num_heads: 4
+  conv_kernel_size: 15
+  vocab_size: 40
+  dropout: 0.1
+
+decode:
+  method: greedy

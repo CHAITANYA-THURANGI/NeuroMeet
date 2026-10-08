@@ -1,0 +1,84 @@
+{
+  "scenario_id": "client_discovery_fintech",
+  "title": "Enterprise Client Technical Discovery \u2014 FinTech Onboarding",
+  "scenario_type": "Client Discovery",
+  "speakers": [
+    "Sam (Solutions Architect)",
+    "Jessica (Enterprise AE)",
+    "Vikram (Client VP Infrastructure)"
+  ],
+  "turns": [
+    {
+      "speaker": "Jessica (Enterprise AE)",
+      "start_sec": 0.0,
+      "end_sec": 5.0,
+      "text": "Thanks Vikram for joining us today. Our goal is to assess your compliance requirements and technical onboarding schedule."
+    },
+    {
+      "speaker": "Vikram (Client VP Infrastructure)",
+      "start_sec": 5.8,
+      "end_sec": 13.0,
+      "text": "We operate in heavily regulated banking environments. We require SOC2 Type II compliance, zero data retention for LLM training, and SAML SSO."
+    },
+    {
+      "speaker": "Sam (Solutions Architect)",
+      "start_sec": 14.0,
+      "end_sec": 20.0,
+      "text": "Our platform meets SOC2 and ISO27001 out of the box, and we provide customer-managed encryption keys via AWS KMS."
+    },
+    {
+      "speaker": "Vikram (Client VP Infrastructure)",
+      "start_sec": 21.0,
+      "end_sec": 27.0,
+      "text": "That's great. If we sign the pilot by October 15, how quickly can our 5,000 employees be provisioned?"
+    },
+    {
+      "speaker": "Sam (Solutions Architect)",
+      "start_sec": 28.0,
+      "end_sec": 34.0,
+      "text": "I will deliver the technical architecture whitepaper and Okta SCIM integration guide by Wednesday."
+    },
+    {
+      "speaker": "Jessica (Enterprise AE)",
+      "start_sec": 35.0,
+      "end_sec": 40.5,
+      "text": "I will send over the customized enterprise master service agreement and pilot pricing tier by tomorrow afternoon."
+    },
+    {
+      "speaker": "Vikram (Client VP Infrastructure)",
+      "start_sec": 41.0,
+      "end_sec": 46.0,
+      "text": "Sounds good. We agreed to review the MSA with our legal team on Thursday and finalize the pilot date."
+    }
+  ],
+  "ground_truth_summary": "The discovery call focused on compliance, Okta SCIM provisioning, and AWS KMS encryption for banking deployment. Sam will deliver the architecture whitepaper and SCIM integration guide by Wednesday. Jessica will share the enterprise MSA and pilot pricing by tomorrow afternoon. The client agreed to legal review on Thursday with an October 15 target pilot.",
+  "ground_truth_decisions": [
+    "Include customer-managed encryption keys (AWS KMS) in standard pilot tier",
+    "Target October 15 for 5,000-seat employee onboarding pilot"
+  ],
+  "ground_truth_action_items": [
+    {
+      "task": "Deliver technical architecture whitepaper and Okta SCIM guide",
+      "assignee": "Sam",
+      "deadline": "Wednesday",
+      "priority": "high"
+    },
+    {
+      "task": "Send enterprise MSA contract and pilot pricing tier",
+      "assignee": "Jessica",
+      "deadline": "Tomorrow afternoon",
+      "priority": "high"
+    },
+    {
+      "task": "Review MSA with corporate legal team",
+      "assignee": "Vikram",
+      "deadline": "Thursday",
+      "priority": "medium"
+    }
+  ],
+  "ground_truth_topics": [
+    "Banking Regulatory & Compliance Requirements",
+    "SCIM Identity & Encryption Architecture",
+    "Pilot Commercial Agreement"
+  ]
+}

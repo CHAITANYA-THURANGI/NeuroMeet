@@ -1,0 +1,15 @@
+# Experiment: SpeakerNet ECAPA-TDNN Architecture
+name: speaker_ecapa_tdnn
+description: "Time-Delay Neural Network with dilated convolutions, Squeeze-and-Excitation, and ASP"
+model:
+  feat_dim: 80
+  channels: 192
+  emb_dim: 192
+  pooling: attentive_stats
+  dropout: 0.1
+
+diarization:
+  clustering: spectral
+  affinity: cosine
+  min_speakers: 1
+  max_speakers: 6

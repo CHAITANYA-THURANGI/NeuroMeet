@@ -1,0 +1,85 @@
+{
+  "scenario_id": "board_strategy_q3",
+  "title": "Q3 Executive Board & AI Capital Investment Strategy",
+  "scenario_type": "Executive Board",
+  "speakers": [
+    "Elena (CEO)",
+    "Marcus (CFO)",
+    "Dr. Aris (CTO)",
+    "Chloe (Chief Product Officer)"
+  ],
+  "turns": [
+    {
+      "speaker": "Elena (CEO)",
+      "start_sec": 0.0,
+      "end_sec": 5.0,
+      "text": "Welcome everyone. Today we are reviewing our Q3 performance and authorizing the FY27 GenAI enterprise roadmap."
+    },
+    {
+      "speaker": "Marcus (CFO)",
+      "start_sec": 5.8,
+      "end_sec": 12.0,
+      "text": "Q3 closed at 18.4 million ARR, beating forecast by 12 percent. Operating cash flow is positive at 3.2 million."
+    },
+    {
+      "speaker": "Dr. Aris (CTO)",
+      "start_sec": 13.0,
+      "end_sec": 19.5,
+      "text": "To maintain our competitive moat, we need a 2.5 million capital investment in dedicated GPU training clusters and on-premise model serving."
+    },
+    {
+      "speaker": "Chloe (Chief Product Officer)",
+      "start_sec": 20.2,
+      "end_sec": 26.5,
+      "text": "Enterprise clients in financial services and healthcare won't adopt our platform unless we support sovereign private VPC deployments."
+    },
+    {
+      "speaker": "Elena (CEO)",
+      "start_sec": 27.0,
+      "end_sec": 32.5,
+      "text": "I agree. The market window is open now. Marcus, can we allocate the 2.5 million from retained earnings?"
+    },
+    {
+      "speaker": "Marcus (CFO)",
+      "start_sec": 33.0,
+      "end_sec": 38.0,
+      "text": "Yes, I will prepare the revised FY27 capital allocation budget reflecting the 2.5 million GPU investment by next Monday."
+    },
+    {
+      "speaker": "Dr. Aris (CTO)",
+      "start_sec": 39.0,
+      "end_sec": 44.5,
+      "text": "I will deliver the vendor benchmark for NVIDIA H100 versus B200 clusters by end of month."
+    },
+    {
+      "speaker": "Elena (CEO)",
+      "start_sec": 45.0,
+      "end_sec": 51.0,
+      "text": "Resolution passed: the board unanimously approved the 2.5 million investment for private AI infrastructure."
+    }
+  ],
+  "ground_truth_summary": "The board reviewed Q3 performance ($18.4M ARR, +12% over forecast) and unanimously approved a $2.5M capital allocation for private GPU clusters and enterprise sovereign AI deployments. Marcus will prepare the revised budget by next Monday, while Dr. Aris will finalize GPU hardware benchmarks by end of month.",
+  "ground_truth_decisions": [
+    "Unanimously approved $2.5M capital allocation for private enterprise AI infrastructure",
+    "Prioritize private sovereign VPC deployments for healthcare and finance clients"
+  ],
+  "ground_truth_action_items": [
+    {
+      "task": "Prepare revised FY27 capital budget with 2.5M GPU allocation",
+      "assignee": "Marcus",
+      "deadline": "Next Monday",
+      "priority": "high"
+    },
+    {
+      "task": "Deliver vendor benchmark for NVIDIA H100 vs B200 clusters",
+      "assignee": "Dr. Aris",
+      "deadline": "End of month",
+      "priority": "medium"
+    }
+  ],
+  "ground_truth_topics": [
+    "Q3 Financial Performance",
+    "Enterprise AI & Sovereign Infrastructure",
+    "Capital Allocation Approval"
+  ]
+}

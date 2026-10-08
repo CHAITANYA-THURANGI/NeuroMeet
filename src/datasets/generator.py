@@ -1,0 +1,182 @@
+"""Realistic Enterprise Meeting Scenario Generator."""
+
+from __future__ import annotations
+from dataclasses import dataclass, field
+import json
+from pathlib import Path
+from typing import Any, Dict, List
+
+
+@dataclass
+class MeetingScenario:
+    """A complete structured meeting scenario with transcripts, speakers, and annotations."""
+    scenario_id: str
+    title: str
+    scenario_type: str
+    speakers: List[str]
+    turns: List[Dict[str, Any]]
+    ground_truth_summary: str
+    ground_truth_decisions: List[str]
+    ground_truth_action_items: List[Dict[str, str]]
+    ground_truth_topics: List[str]
+
+
+def generate_sprint_planning() -> MeetingScenario:
+    """Sprint Planning Meeting for Cloud Platform."""
+    speakers = ["Alex (Scrum Master)", "Maya (Backend Lead)", "Leo (Frontend Dev)", "Priya (QA Engineer)"]
+    turns = [
+        {"speaker": "Alex (Scrum Master)", "start_sec": 0.0, "end_sec": 4.5, "text": "Good morning team, let's kick off Sprint 42 planning. Today our focus is payment gateway migration and real-time alerts."},
+        {"speaker": "Maya (Backend Lead)", "start_sec": 5.0, "end_sec": 11.2, "text": "On backend, the Stripe v3 upgrade is almost complete. However, we noticed intermittent timeout errors when testing webhook retries under high concurrency."},
+        {"speaker": "Leo (Frontend Dev)", "start_sec": 12.0, "end_sec": 17.8, "text": "From UI side, the new checkout modal is built, but we need updated endpoint contracts from Maya before connecting live tokens."},
+        {"speaker": "Alex (Scrum Master)", "start_sec": 18.5, "end_sec": 23.0, "text": "Understood. Maya, can you finalize the OpenAPI specification for checkout by tomorrow EOD?"},
+        {"speaker": "Maya (Backend Lead)", "start_sec": 23.5, "end_sec": 28.0, "text": "Yes, I will finalize the OpenAPI schema and fix the webhook retry logic by tomorrow EOD."},
+        {"speaker": "Priya (QA Engineer)", "start_sec": 29.0, "end_sec": 35.5, "text": "I will prepare end-to-end integration test suites for the payment flow by Friday so we can run load testing over the weekend."},
+        {"speaker": "Leo (Frontend Dev)", "start_sec": 36.0, "end_sec": 41.5, "text": "Great, then I will hook up the checkout frontend components to the staging API by Thursday."},
+        {"speaker": "Alex (Scrum Master)", "start_sec": 42.0, "end_sec": 48.0, "text": "Awesome. So we decided to proceed with Stripe v3 cutover next Tuesday, provided Priya's load tests pass with zero regression."}
+    ]
+    summary = "Sprint 42 focused on completing the Stripe v3 payment gateway migration and checkout modal. Maya committed to delivering OpenAPI specifications and webhook retry fixes by tomorrow EOD. Leo will connect frontend components by Thursday, and Priya will execute end-to-end load testing by Friday. The team agreed on a production cutover target for next Tuesday."
+    decisions = [
+        "Cutover to Stripe v3 on next Tuesday pending successful load testing",
+        "Adopt OpenAPI schema as the single source of truth for checkout contracts"
+    ]
+    action_items = [
+        {"task": "Finalize OpenAPI schema and fix webhook retry logic", "assignee": "Maya", "deadline": "Tomorrow EOD", "priority": "high"},
+        {"task": "Prepare end-to-end integration and load test suites", "assignee": "Priya", "deadline": "Friday", "priority": "high"},
+        {"task": "Hook up checkout frontend components to staging API", "assignee": "Leo", "deadline": "Thursday", "priority": "medium"}
+    ]
+    topics = ["Payment Gateway Migration", "API Contract Synchronization", "QA Load Testing & Cutover Plan"]
+
+    return MeetingScenario(
+        scenario_id="sprint_planning_42",
+        title="Sprint 42 Planning — Stripe v3 Migration",
+        scenario_type="Sprint Planning",
+        speakers=speakers,
+        turns=turns,
+        ground_truth_summary=summary,
+        ground_truth_decisions=decisions,
+        ground_truth_action_items=action_items,
+        ground_truth_topics=topics,
+    )
+
+
+def generate_tech_postmortem() -> MeetingScenario:
+    """Production Outage Post-Mortem."""
+    speakers = ["David (Site Reliability Lead)", "Sarah (Principal Architect)", "Ken (DevOps Engineer)", "Rachel (VP Engineering)"]
+    turns = [
+        {"speaker": "David (Site Reliability Lead)", "start_sec": 0.0, "end_sec": 6.2, "text": "Let's review the incident from yesterday at 14:15 UTC where the user auth cluster experienced 42 minutes of elevated 504 gateway timeouts."},
+        {"speaker": "Sarah (Principal Architect)", "start_sec": 7.0, "end_sec": 14.5, "text": "The root cause was a connection pool leak in the Redis session cache caused by an unhandled TLS handshake retry loop."},
+        {"speaker": "Ken (DevOps Engineer)", "start_sec": 15.0, "end_sec": 21.0, "text": "When CPU spiked to 98%, Kubernetes horizontal pod autoscaling failed to trigger because the metric server crashed simultaneously."},
+        {"speaker": "Rachel (VP Engineering)", "start_sec": 22.0, "end_sec": 27.5, "text": "That's unacceptable for our enterprise SLA. We need hard circuit breakers and independent alerting."},
+        {"speaker": "Sarah (Principal Architect)", "start_sec": 28.0, "end_sec": 34.0, "text": "I will deploy the Redis connection pooling patch with exponential backoff and timeout caps by tonight."},
+        {"speaker": "David (Site Reliability Lead)", "start_sec": 35.0, "end_sec": 41.5, "text": "I will configure external Datadog synthetic monitors bypassing in-cluster metrics by tomorrow noon."},
+        {"speaker": "Ken (DevOps Engineer)", "start_sec": 42.0, "end_sec": 48.0, "text": "I will update the on-call runbook and run a chaos engineering drill on staging by Friday."},
+        {"speaker": "Rachel (VP Engineering)", "start_sec": 49.0, "end_sec": 55.0, "text": "Approved. We agreed to mandate circuit breakers on all external cache dependencies starting immediately."}
+    ]
+    summary = "The post-mortem analyzed a 42-minute auth service outage caused by a Redis connection pool leak and HPA metrics failure. Sarah committed to patching the Redis connection pooling by tonight, David will set up external synthetic monitors by tomorrow, and Ken will update on-call runbooks and conduct chaos drills by Friday. The team mandated circuit breakers across all cache dependencies."
+    decisions = [
+        "Mandate circuit breakers on all external cache dependencies immediately",
+        "Adopt independent external monitoring to eliminate single-point-of-failure metrics"
+    ]
+    action_items = [
+        {"task": "Deploy Redis connection pooling patch with exponential backoff", "assignee": "Sarah", "deadline": "Tonight", "priority": "urgent"},
+        {"task": "Configure external Datadog synthetic monitors", "assignee": "David", "deadline": "Tomorrow noon", "priority": "high"},
+        {"task": "Update on-call runbook and run chaos drill on staging", "assignee": "Ken", "deadline": "Friday", "priority": "high"}
+    ]
+    topics = ["Root Cause Analysis", "Autoscaler Infrastructure Failure", "Preventative Hardening Action Plan"]
+
+    return MeetingScenario(
+        scenario_id="tech_postmortem_redis",
+        title="P0 Incident Post-Mortem — Auth Cluster 504 Outage",
+        scenario_type="Incident Post-Mortem",
+        speakers=speakers,
+        turns=turns,
+        ground_truth_summary=summary,
+        ground_truth_decisions=decisions,
+        ground_truth_action_items=action_items,
+        ground_truth_topics=topics,
+    )
+
+
+def generate_board_strategy() -> MeetingScenario:
+    """Executive Board Meeting."""
+    speakers = ["Elena (CEO)", "Marcus (CFO)", "Dr. Aris (CTO)", "Chloe (Chief Product Officer)"]
+    turns = [
+        {"speaker": "Elena (CEO)", "start_sec": 0.0, "end_sec": 5.0, "text": "Welcome everyone. Today we are reviewing our Q3 performance and authorizing the FY27 GenAI enterprise roadmap."},
+        {"speaker": "Marcus (CFO)", "start_sec": 5.8, "end_sec": 12.0, "text": "Q3 closed at 18.4 million ARR, beating forecast by 12 percent. Operating cash flow is positive at 3.2 million."},
+        {"speaker": "Dr. Aris (CTO)", "start_sec": 13.0, "end_sec": 19.5, "text": "To maintain our competitive moat, we need a 2.5 million capital investment in dedicated GPU training clusters and on-premise model serving."},
+        {"speaker": "Chloe (Chief Product Officer)", "start_sec": 20.2, "end_sec": 26.5, "text": "Enterprise clients in financial services and healthcare won't adopt our platform unless we support sovereign private VPC deployments."},
+        {"speaker": "Elena (CEO)", "start_sec": 27.0, "end_sec": 32.5, "text": "I agree. The market window is open now. Marcus, can we allocate the 2.5 million from retained earnings?"},
+        {"speaker": "Marcus (CFO)", "start_sec": 33.0, "end_sec": 38.0, "text": "Yes, I will prepare the revised FY27 capital allocation budget reflecting the 2.5 million GPU investment by next Monday."},
+        {"speaker": "Dr. Aris (CTO)", "start_sec": 39.0, "end_sec": 44.5, "text": "I will deliver the vendor benchmark for NVIDIA H100 versus B200 clusters by end of month."},
+        {"speaker": "Elena (CEO)", "start_sec": 45.0, "end_sec": 51.0, "text": "Resolution passed: the board unanimously approved the 2.5 million investment for private AI infrastructure."}
+    ]
+    summary = "The board reviewed Q3 performance ($18.4M ARR, +12% over forecast) and unanimously approved a $2.5M capital allocation for private GPU clusters and enterprise sovereign AI deployments. Marcus will prepare the revised budget by next Monday, while Dr. Aris will finalize GPU hardware benchmarks by end of month."
+    decisions = [
+        "Unanimously approved $2.5M capital allocation for private enterprise AI infrastructure",
+        "Prioritize private sovereign VPC deployments for healthcare and finance clients"
+    ]
+    action_items = [
+        {"task": "Prepare revised FY27 capital budget with 2.5M GPU allocation", "assignee": "Marcus", "deadline": "Next Monday", "priority": "high"},
+        {"task": "Deliver vendor benchmark for NVIDIA H100 vs B200 clusters", "assignee": "Dr. Aris", "deadline": "End of month", "priority": "medium"}
+    ]
+    topics = ["Q3 Financial Performance", "Enterprise AI & Sovereign Infrastructure", "Capital Allocation Approval"]
+
+    return MeetingScenario(
+        scenario_id="board_strategy_q3",
+        title="Q3 Executive Board & AI Capital Investment Strategy",
+        scenario_type="Executive Board",
+        speakers=speakers,
+        turns=turns,
+        ground_truth_summary=summary,
+        ground_truth_decisions=decisions,
+        ground_truth_action_items=action_items,
+        ground_truth_topics=topics,
+    )
+
+
+def generate_client_discovery() -> MeetingScenario:
+    """Client Discovery & Technical Scoping."""
+    speakers = ["Sam (Solutions Architect)", "Jessica (Enterprise AE)", "Vikram (Client VP Infrastructure)"]
+    turns = [
+        {"speaker": "Jessica (Enterprise AE)", "start_sec": 0.0, "end_sec": 5.0, "text": "Thanks Vikram for joining us today. Our goal is to assess your compliance requirements and technical onboarding schedule."},
+        {"speaker": "Vikram (Client VP Infrastructure)", "start_sec": 5.8, "end_sec": 13.0, "text": "We operate in heavily regulated banking environments. We require SOC2 Type II compliance, zero data retention for LLM training, and SAML SSO."},
+        {"speaker": "Sam (Solutions Architect)", "start_sec": 14.0, "end_sec": 20.0, "text": "Our platform meets SOC2 and ISO27001 out of the box, and we provide customer-managed encryption keys via AWS KMS."},
+        {"speaker": "Vikram (Client VP Infrastructure)", "start_sec": 21.0, "end_sec": 27.0, "text": "That's great. If we sign the pilot by October 15, how quickly can our 5,000 employees be provisioned?"},
+        {"speaker": "Sam (Solutions Architect)", "start_sec": 28.0, "end_sec": 34.0, "text": "I will deliver the technical architecture whitepaper and Okta SCIM integration guide by Wednesday."},
+        {"speaker": "Jessica (Enterprise AE)", "start_sec": 35.0, "end_sec": 40.5, "text": "I will send over the customized enterprise master service agreement and pilot pricing tier by tomorrow afternoon."},
+        {"speaker": "Vikram (Client VP Infrastructure)", "start_sec": 41.0, "end_sec": 46.0, "text": "Sounds good. We agreed to review the MSA with our legal team on Thursday and finalize the pilot date."}
+    ]
+    summary = "The discovery call focused on compliance, Okta SCIM provisioning, and AWS KMS encryption for banking deployment. Sam will deliver the architecture whitepaper and SCIM integration guide by Wednesday. Jessica will share the enterprise MSA and pilot pricing by tomorrow afternoon. The client agreed to legal review on Thursday with an October 15 target pilot."
+    decisions = [
+        "Include customer-managed encryption keys (AWS KMS) in standard pilot tier",
+        "Target October 15 for 5,000-seat employee onboarding pilot"
+    ]
+    action_items = [
+        {"task": "Deliver technical architecture whitepaper and Okta SCIM guide", "assignee": "Sam", "deadline": "Wednesday", "priority": "high"},
+        {"task": "Send enterprise MSA contract and pilot pricing tier", "assignee": "Jessica", "deadline": "Tomorrow afternoon", "priority": "high"},
+        {"task": "Review MSA with corporate legal team", "assignee": "Vikram", "deadline": "Thursday", "priority": "medium"}
+    ]
+    topics = ["Banking Regulatory & Compliance Requirements", "SCIM Identity & Encryption Architecture", "Pilot Commercial Agreement"]
+
+    return MeetingScenario(
+        scenario_id="client_discovery_fintech",
+        title="Enterprise Client Technical Discovery — FinTech Onboarding",
+        scenario_type="Client Discovery",
+        speakers=speakers,
+        turns=turns,
+        ground_truth_summary=summary,
+        ground_truth_decisions=decisions,
+        ground_truth_action_items=action_items,
+        ground_truth_topics=topics,
+    )
+
+
+def generate_meeting_scenarios() -> Dict[str, MeetingScenario]:
+    """Generates complete dictionary of pre-packaged meeting scenarios."""
+    scenarios = {
+        "sprint_planning": generate_sprint_planning(),
+        "tech_postmortem": generate_tech_postmortem(),
+        "board_strategy": generate_board_strategy(),
+        "client_discovery": generate_client_discovery(),
+    }
+    return scenarios

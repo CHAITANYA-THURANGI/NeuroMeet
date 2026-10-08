@@ -1,0 +1,91 @@
+{
+  "scenario_id": "sprint_planning_42",
+  "title": "Sprint 42 Planning \u2014 Stripe v3 Migration",
+  "scenario_type": "Sprint Planning",
+  "speakers": [
+    "Alex (Scrum Master)",
+    "Maya (Backend Lead)",
+    "Leo (Frontend Dev)",
+    "Priya (QA Engineer)"
+  ],
+  "turns": [
+    {
+      "speaker": "Alex (Scrum Master)",
+      "start_sec": 0.0,
+      "end_sec": 4.5,
+      "text": "Good morning team, let's kick off Sprint 42 planning. Today our focus is payment gateway migration and real-time alerts."
+    },
+    {
+      "speaker": "Maya (Backend Lead)",
+      "start_sec": 5.0,
+      "end_sec": 11.2,
+      "text": "On backend, the Stripe v3 upgrade is almost complete. However, we noticed intermittent timeout errors when testing webhook retries under high concurrency."
+    },
+    {
+      "speaker": "Leo (Frontend Dev)",
+      "start_sec": 12.0,
+      "end_sec": 17.8,
+      "text": "From UI side, the new checkout modal is built, but we need updated endpoint contracts from Maya before connecting live tokens."
+    },
+    {
+      "speaker": "Alex (Scrum Master)",
+      "start_sec": 18.5,
+      "end_sec": 23.0,
+      "text": "Understood. Maya, can you finalize the OpenAPI specification for checkout by tomorrow EOD?"
+    },
+    {
+      "speaker": "Maya (Backend Lead)",
+      "start_sec": 23.5,
+      "end_sec": 28.0,
+      "text": "Yes, I will finalize the OpenAPI schema and fix the webhook retry logic by tomorrow EOD."
+    },
+    {
+      "speaker": "Priya (QA Engineer)",
+      "start_sec": 29.0,
+      "end_sec": 35.5,
+      "text": "I will prepare end-to-end integration test suites for the payment flow by Friday so we can run load testing over the weekend."
+    },
+    {
+      "speaker": "Leo (Frontend Dev)",
+      "start_sec": 36.0,
+      "end_sec": 41.5,
+      "text": "Great, then I will hook up the checkout frontend components to the staging API by Thursday."
+    },
+    {
+      "speaker": "Alex (Scrum Master)",
+      "start_sec": 42.0,
+      "end_sec": 48.0,
+      "text": "Awesome. So we decided to proceed with Stripe v3 cutover next Tuesday, provided Priya's load tests pass with zero regression."
+    }
+  ],
+  "ground_truth_summary": "Sprint 42 focused on completing the Stripe v3 payment gateway migration and checkout modal. Maya committed to delivering OpenAPI specifications and webhook retry fixes by tomorrow EOD. Leo will connect frontend components by Thursday, and Priya will execute end-to-end load testing by Friday. The team agreed on a production cutover target for next Tuesday.",
+  "ground_truth_decisions": [
+    "Cutover to Stripe v3 on next Tuesday pending successful load testing",
+    "Adopt OpenAPI schema as the single source of truth for checkout contracts"
+  ],
+  "ground_truth_action_items": [
+    {
+      "task": "Finalize OpenAPI schema and fix webhook retry logic",
+      "assignee": "Maya",
+      "deadline": "Tomorrow EOD",
+      "priority": "high"
+    },
+    {
+      "task": "Prepare end-to-end integration and load test suites",
+      "assignee": "Priya",
+      "deadline": "Friday",
+      "priority": "high"
+    },
+    {
+      "task": "Hook up checkout frontend components to staging API",
+      "assignee": "Leo",
+      "deadline": "Thursday",
+      "priority": "medium"
+    }
+  ],
+  "ground_truth_topics": [
+    "Payment Gateway Migration",
+    "API Contract Synchronization",
+    "QA Load Testing & Cutover Plan"
+  ]
+}

@@ -1,0 +1,131 @@
+# ==============================================================================
+# NeuroMeet: AI-Powered Meeting Assistant Using Deep Learning
+# Global Master Configuration
+# ==============================================================================
+
+seed: 42
+deterministic: true
+
+# ------------------------------------------------------------------------------
+# Audio & Acoustic Feature Extraction
+# ------------------------------------------------------------------------------
+audio:
+  sample_rate: 16000
+  n_fft: 512
+  hop_length: 160        # 10ms hop
+  win_length: 400        # 25ms window
+  n_mels: 80
+  f_min: 50.0
+  f_max: 8000.0
+  vad:
+    energy_threshold: 0.015
+    zcr_threshold: 0.12
+    min_speech_duration_ms: 250
+    min_silence_duration_ms: 300
+
+# ------------------------------------------------------------------------------
+# Deep Learning Model Architectures
+# ------------------------------------------------------------------------------
+models:
+  # 1. Neural Speaker Verification & Embedding Network (ECAPA-TDNN style)
+  speaker_net:
+    feat_dim: 80
+    channels: 192
+    bottleneck_dim: 96
+    emb_dim: 192
+    pooling: attentive_stats # attentive_stats | mean_max
+    dropout: 0.1
+
+  # 2. Conformer & BiGRU Acoustic Speech-to-Text Model (ASR / CTC)
+  speech_ctc:
+    input_dim: 80
+    d_model: 144
+    n_conformer_blocks: 4
+    num_heads: 4
+    conv_kernel_size: 15
+    ff_expansion_factor: 4
+    dropout: 0.1
+    vocab_size: 40           # Characters + blank + space + punctuation
+
+  # 3. Hierarchical Attention Meeting Summarizer (HAN + Pointer Generator)
+  summarizer:
+    type: hierarchical       # hierarchical | pointer_generator | baseline_extractive
+    emb_dim: 128
+    word_hid_dim: 128
+    utt_hid_dim: 192
+    attention: scaled_dot    # scaled_dot | bahdanau | luong_general
+    copy_gate: true          # Pointer-generator entity copy mechanism
+    num_heads: 4
+    max_summary_len: 256
+    beam_size: 3
+    coverage_loss: true
+
+  # 4. Deep Action Item & Entity Extractor (BiLSTM-CRF + Attention)
+  action_extractor:
+    emb_dim: 128
+    hid_dim: 160
+    num_layers: 2
+    dropout: 0.2
+    tag_set: ["O", "B-ACT", "I-ACT", "B-WHO", "I-WHO", "B-WHEN", "I-WHEN", "B-PRIO", "I-PRIO"]
+    priority_classes: ["low", "medium", "high", "urgent"]
+
+  # 5. Meeting Dynamics, Sentiment & Engagement Network
+  dynamics_net:
+    emb_dim: 128
+    hid_dim: 96
+    sentiment_classes: ["positive", "neutral", "negative"]
+    agreement_classes: ["consensus", "neutral", "contention"]
+    dropout: 0.15
+
+  # 6. Dense Semantic Retriever for Meeting Q&A (Dual-Encoder)
+  dense_retriever:
+    emb_dim: 128
+    query_hid_dim: 128
+    doc_hid_dim: 128
+    top_k: 3
+
+# ------------------------------------------------------------------------------
+# Diarization Clustering & Turn Segmentation
+# ------------------------------------------------------------------------------
+diarization:
+  min_speakers: 1
+  max_speakers: 8
+  clustering_method: spectral # spectral | agglomerative
+  affinity_metric: cosine
+  similarity_threshold: 0.65
+  window_size_sec: 1.5
+  step_size_sec: 0.75
+
+# ------------------------------------------------------------------------------
+# Training & Optimization Parameters
+# ------------------------------------------------------------------------------
+train:
+  batch_size: 16
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  grad_clip: 1.0
+  epochs: 30
+  patience: 6
+  device: auto              # auto | cuda | cpu
+  fp16: false
+
+# ------------------------------------------------------------------------------
+# REST API & Web Server Configurations
+# ------------------------------------------------------------------------------
+api:
+  host: "127.0.0.1"
+  port: 8000
+  debug: false
+  cors_origins: ["*"]
+  max_audio_upload_mb: 50
+  rate_limit_per_minute: 120
+
+# ------------------------------------------------------------------------------
+# Storage & Paths
+# ------------------------------------------------------------------------------
+paths:
+  data_dir: "data"
+  processed_dir: "data/processed"
+  checkpoints_dir: "experiments/checkpoints"
+  logs_dir: "experiments/logs"
+  web_dir: "web"

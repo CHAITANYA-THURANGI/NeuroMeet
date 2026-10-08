@@ -1,0 +1,12 @@
+# Experiment: Baseline Extractive Summarizer (TextRank Graph Centrality)
+name: baseline_extractive
+description: "TextRank graph-based extractive summarization baseline without neural generation"
+model:
+  type: extractive_graph
+  damping: 0.85
+  max_iter: 50
+  top_n: 4
+
+evaluation:
+  metric: rouge
+  dataset: "data/processed"

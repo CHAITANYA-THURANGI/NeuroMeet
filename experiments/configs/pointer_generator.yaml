@@ -1,0 +1,19 @@
+# Experiment: Pointer-Generator Hierarchical Summarizer (SOTA)
+name: pointer_generator
+description: "Hierarchical Attention Network with Pointer-Generator Copy Gate for entity preservation"
+model:
+  type: pointer_generator
+  vocab_size: 4000
+  emb_dim: 128
+  word_hid_dim: 128
+  utt_hid_dim: 192
+  dec_hid_dim: 192
+  copy_gate: true
+  attention: scaled_dot
+  coverage_loss: true
+
+train:
+  batch_size: 16
+  lr: 0.0008
+  epochs: 40
+  optimizer: adamw
