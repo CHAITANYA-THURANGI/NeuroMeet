@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import List, Optional
 import numpy as np
 import torch
-from ..audio.features import LogMelExtractor
+from ..audio.features import LogMelExtractor, compute_mfcc
 from ..audio.vad import EnergyZCRVAD, SpeechSegment
 from ..models.speaker_net import SpeakerNet
 from .clustering import AgglomerativeSpeakerClusterer, SpectralSpeakerClusterer
@@ -93,8 +93,31 @@ class SpeakerDiarizer:
             ]
             batch_t = torch.stack(padded).to(self.device)
             features = self.feature_extractor(batch_t)
-            embs = self.speaker_net(features)
-            embeddings_list.extend(embs.cpu().numpy())
+            embs = self.speaker_net(features).cpu().numpy()
+
+            # Enrich with acoustic timbre & vocal tract descriptors
+            mfccs = compute_mfcc(features, n_mfcc=8).mean(dim=-1).detach().cpu().numpy()
+            for b_idx, win in enumerate(batch_wins):
+                sig = win.waveform.squeeze().cpu().numpy()
+                fft = np.abs(np.fft.rfft(sig))
+                freqs = np.fft.rfftfreq(len(sig), 1.0 / self.sample_rate)
+                total_energy = float(np.sum(fft) + 1e-9)
+
+                centroid = float(np.sum(freqs * fft) / total_energy)
+                b1 = float(np.sum(fft[(freqs >= 50) & (freqs < 300)]) / total_energy)
+                b2 = float(np.sum(fft[(freqs >= 300) & (freqs < 1000)]) / total_energy)
+                b3 = float(np.sum(fft[(freqs >= 1000) & (freqs < 3000)]) / total_energy)
+                b4 = float(np.sum(fft[(freqs >= 3000) & (freqs <= 8000)]) / total_energy)
+                zcr = float(np.mean(np.abs(np.diff(np.sign(sig + 1e-9)))))
+
+                ac_vec = np.concatenate([
+                    [centroid / 1000.0, b1 * 2.0, b2 * 2.0, b3 * 2.0, b4 * 2.0, zcr * 5.0],
+                    mfccs[b_idx],
+                ])
+                ac_norm = ac_vec / (np.linalg.norm(ac_vec) + 1e-9)
+                hybrid = np.concatenate([embs[b_idx] * 0.7, ac_norm * 0.7])
+                hybrid = hybrid / (np.linalg.norm(hybrid) + 1e-9)
+                embeddings_list.append(hybrid)
 
         embeddings = np.array(embeddings_list, dtype=np.float32)
 

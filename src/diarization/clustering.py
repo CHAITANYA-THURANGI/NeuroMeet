@@ -126,14 +126,25 @@ class SpectralSpeakerClusterer:
         # 4. Determine number of speakers (Eigengap heuristic)
         if num_speakers is None:
             max_k = min(self.max_speakers, n_samples - 1)
-            min_k = min(self.min_speakers, max_k)
+            # Evaluate single speaker monologue vs multi-speaker dialogue
+            is_single_speaker = (
+                self.min_speakers == 1
+                and (eigenvalues[1] < 0.035 or np.min(affinity) > 0.88)
+            )
 
-            if max_k <= min_k:
-                k = min_k
+            if is_single_speaker or max_k < 2:
+                k = 1
             else:
-                # Eigengap: diff between consecutive eigenvalues
-                gaps = eigenvalues[min_k - 1 : max_k] - eigenvalues[min_k : max_k + 1]
-                k = min_k + int(np.argmax(gaps))
+                # Multi-speaker meeting: search k >= 2 maximizing eigengap (lambda_k - lambda_{k+1})
+                start_k = max(2, self.min_speakers)
+                best_k = start_k
+                best_gap = -1.0
+                for candidate_k in range(start_k, max_k + 1):
+                    gap = float(eigenvalues[candidate_k - 1] - eigenvalues[candidate_k])
+                    if gap > best_gap:
+                        best_gap = gap
+                        best_k = candidate_k
+                k = best_k
         else:
             k = max(1, min(num_speakers, n_samples))
 

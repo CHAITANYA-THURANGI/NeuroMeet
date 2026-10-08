@@ -76,9 +76,13 @@ class EnergyZCRVAD:
             energies = np.zeros(0, dtype=np.float32)
             zcrs = np.zeros(0, dtype=np.float32)
 
-        # Adaptive background noise estimation (10th percentile energy floor)
+        # Adaptive background noise estimation (guarded against continuous speech clipping)
         ambient_energy = float(np.percentile(energies, 10)) if num_frames > 0 else 0.005
-        effective_energy_thresh = max(self.energy_threshold, ambient_energy * 1.8)
+        if ambient_energy < self.energy_threshold:
+            effective_energy_thresh = max(self.energy_threshold * 0.5, ambient_energy * 1.5)
+        else:
+            effective_energy_thresh = self.energy_threshold
+
 
         # Raw frame-level speech decision
         is_speech = (energies > effective_energy_thresh) | (

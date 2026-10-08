@@ -50,3 +50,26 @@ def test_speaker_diarizer_pipeline() -> None:
         assert turns[0].start_sec >= 0.0
         assert turns[0].end_sec <= 3.1
         assert "Speaker" in turns[0].speaker_id
+
+
+def test_multi_speaker_detection_audio() -> None:
+    """Verifies that diarization correctly detects multiple distinct speakers in audio."""
+    net = SpeakerNet(feat_dim=80, channels=64, emb_dim=128)
+    diarizer = SpeakerDiarizer(speaker_net=net, sample_rate=16000)
+
+    sr = 16000
+    t1 = np.linspace(0, 3.0, int(3.0 * sr), endpoint=False)
+    t2 = np.linspace(0, 3.0, int(3.0 * sr), endpoint=False)
+    v1 = 0.5 * np.sin(2 * np.pi * 120 * t1) + 0.3 * np.sin(2 * np.pi * 240 * t1)
+    v2 = 0.5 * np.sin(2 * np.pi * 320 * t2) + 0.3 * np.sin(2 * np.pi * 640 * t2)
+    audio = np.concatenate([v1, v2])
+
+    wav = torch.from_numpy(audio.astype(np.float32)).unsqueeze(0)
+    turns = diarizer.diarize(wav)
+
+    assert len(turns) >= 2
+    detected_speakers = set(t.speaker_id for t in turns)
+    assert len(detected_speakers) == 2
+    assert "Speaker 1" in detected_speakers
+    assert "Speaker 2" in detected_speakers
+

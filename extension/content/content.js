@@ -33,17 +33,19 @@
     document.getElementById("nm-hud-modal").style.display = "none";
   });
 
-  // Closed Captions Observer
+  // Closed Captions Observer with Multi-Speaker Detection
   const observer = new MutationObserver(() => {
     // 1. Google Meet subtitle selector
-    const meetCaptions = document.querySelectorAll('div[jsname="YSnbdc"], div.nMHgde, div.VbkSUe');
+    const meetCaptions = document.querySelectorAll('div[jsname="YSnbdc"], div.nMHgde, div.VbkSUe, span.yg7Jfc');
     meetCaptions.forEach((node) => {
       const text = node.innerText.trim();
-      if (text && text !== lastText) {
+      if (text && text !== lastText && text.length > 2) {
         lastText = text;
-        const parent = node.closest('div[jsmodel="c6Tjhe"]') || node.parentElement;
-        const speakerEl = parent ? parent.querySelector('div.zs7LEd, div.NWxV7c') : null;
-        const speaker = speakerEl ? speakerEl.innerText.trim() : "Participant";
+        const parent = node.closest('div[jsmodel="c6Tjhe"]') || node.closest('[data-sender-name]') || node.parentElement;
+        const speakerEl = parent ? parent.querySelector('div.zs7LEd, div.NWxV7c, span.NWxV7c, div.KcIKyf') : null;
+        let speaker = speakerEl ? speakerEl.innerText.trim() : (parent ? parent.getAttribute("data-sender-name") : null);
+        if (!speaker) speaker = lastSpeaker || "Participant 1";
+        lastSpeaker = speaker;
 
         capturedTurns.push({
           speaker: speaker,
@@ -54,14 +56,39 @@
       }
     });
 
-    // 2. Zoom web captions
-    const zoomCaptions = document.querySelectorAll('.caption-content, .subtitle-content');
+    // 2. Microsoft Teams closed captions
+    const teamsCaptions = document.querySelectorAll('div[data-tid="closed-caption-text"], .ui-chat__message__content');
+    teamsCaptions.forEach((node) => {
+      const text = node.innerText.trim();
+      if (text && text !== lastText && text.length > 2) {
+        lastText = text;
+        const parent = node.closest('div[data-tid="closed-caption-item"]') || node.closest('.ui-chat__item') || node.parentElement;
+        const speakerEl = parent ? parent.querySelector('span[data-tid="closed-caption-name"], .ui-chat__message__author') : null;
+        const speaker = speakerEl ? speakerEl.innerText.trim() : (lastSpeaker || "Participant 1");
+        lastSpeaker = speaker;
+
+        capturedTurns.push({
+          speaker: speaker,
+          text: text,
+          timestamp: Date.now(),
+        });
+        updateHudCounter();
+      }
+    });
+
+    // 3. Zoom web captions
+    const zoomCaptions = document.querySelectorAll('.caption-content, .subtitle-content, .meeting-client-caption');
     zoomCaptions.forEach((node) => {
       const text = node.innerText.trim();
-      if (text && text !== lastText) {
+      if (text && text !== lastText && text.length > 2) {
         lastText = text;
+        const parent = node.closest('.caption-item') || node.parentElement;
+        const speakerEl = parent ? parent.querySelector('.speaker-name, .name-tag, .meeting-client-speaker') : null;
+        const speaker = speakerEl ? speakerEl.innerText.trim() : (lastSpeaker || "Participant 1");
+        lastSpeaker = speaker;
+
         capturedTurns.push({
-          speaker: "Participant",
+          speaker: speaker,
           text: text,
           timestamp: Date.now(),
         });

@@ -103,6 +103,7 @@ async def process_audio(
     file: UploadFile = File(...),
     title: Optional[str] = Form(None),
     language: Optional[str] = Form(None),
+    num_speakers: Optional[int] = Form(None),
 ) -> MeetingAnalysisResponse:
     """Processes uploaded audio (WAV, MP3, WebM) through VAD, Diarization, Multilingual ASR, and Meeting Intelligence."""
     pipeline = get_pipeline()
@@ -113,7 +114,12 @@ async def process_audio(
 
     try:
         effective_title = title or file.filename or "Audio Meeting Analysis"
-        result = pipeline.process_audio(contents, title=effective_title, language=language)
+        result = pipeline.process_audio(
+            contents,
+            title=effective_title,
+            num_speakers=num_speakers,
+            language=language,
+        )
         return MeetingAnalysisResponse(**result.to_dict())
     except Exception as e:
         logger.error(f"Error processing audio: {e}", exc_info=True)
