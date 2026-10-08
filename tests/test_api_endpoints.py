@@ -74,3 +74,40 @@ def test_export_endpoint() -> None:
     data = resp.json()
     assert data["format"] == "markdown"
     assert "Strategy Sync" in data["content"]
+
+
+def test_process_audio_endpoint_wav() -> None:
+    wav = generate_synthetic_audio(duration_sec=1.0, sample_rate=16000)
+    buf = io.BytesIO()
+    write_wav(buf, wav, sample_rate=16000)
+    buf.seek(0)
+
+    files = {"file": ("test_meeting.wav", buf.getvalue(), "audio/wav")}
+    data = {"title": "Synthetic Audio Meeting"}
+    resp = client.post("/api/v1/meetings/process-audio", files=files, data=data)
+    assert resp.status_code == 200
+    res_json = resp.json()
+    assert res_json["title"] == "Synthetic Audio Meeting"
+    assert len(res_json["turns"]) >= 1
+
+
+def test_process_audio_endpoint_webm() -> None:
+    import subprocess
+    wav = generate_synthetic_audio(duration_sec=1.0, sample_rate=16000)
+    buf = io.BytesIO()
+    write_wav(buf, wav, sample_rate=16000)
+
+    proc = subprocess.run(
+        ["ffmpeg", "-y", "-i", "pipe:0", "-f", "webm", "-c:a", "libopus", "pipe:1"],
+        input=buf.getvalue(),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        check=True,
+    )
+    files = {"file": ("recording.webm", proc.stdout, "audio/webm")}
+    data = {"title": "Live WebM Recording"}
+    resp = client.post("/api/v1/meetings/process-audio", files=files, data=data)
+    assert resp.status_code == 200
+    res_json = resp.json()
+    assert res_json["title"] == "Live WebM Recording"
+    assert len(res_json["turns"]) >= 1

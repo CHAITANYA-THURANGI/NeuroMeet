@@ -11,28 +11,78 @@ import numpy as np
 import torch
 
 
+def _convert_to_wav_bytes(raw_bytes: bytes, target_sample_rate: int = 16000) -> bytes:
+    """Converts media streams (WebM, OGG, MP3, AAC, FLAC, M4A) to 16-bit PCM WAV using ffmpeg."""
+    import subprocess
+    cmd = [
+        "ffmpeg",
+        "-y",
+        "-nostdin",
+        "-threads", "1",
+        "-i", "pipe:0",
+        "-vn",
+        "-acodec", "pcm_s16le",
+        "-ac", "1",
+        "-ar", str(target_sample_rate),
+        "-f", "wav",
+        "pipe:1",
+    ]
+    try:
+        proc = subprocess.run(
+            cmd,
+            input=raw_bytes,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=True,
+        )
+        return proc.stdout
+    except FileNotFoundError:
+        raise RuntimeError("ffmpeg executable not found on system PATH to convert non-WAV audio.")
+    except subprocess.CalledProcessError as err:
+        err_msg = err.stderr.decode("utf-8", errors="ignore")
+        raise ValueError(f"ffmpeg failed to decode audio stream: {err_msg}") from err
+
+
 def read_wav(
     source: Union[str, Path, bytes, io.BytesIO],
     target_sample_rate: int = 16000,
 ) -> Tuple[torch.Tensor, int]:
     """Reads a WAV audio file or byte buffer into a normalized float32 tensor [-1, 1].
     Converts multi-channel to mono (average) and resamples to target_sample_rate if needed.
+    Transparently decodes WebM, OGG, MP3, and AAC audio streams via ffmpeg fallback.
 
     Returns:
         waveform: Shape [1, num_samples], float32 in [-1.0, 1.0]
         sample_rate: int
     """
-    if isinstance(source, (str, Path)):
-        source_path = str(source)
-    elif isinstance(source, bytes):
-        wav_file = wave.open(io.BytesIO(source), "rb")
-    elif isinstance(source, io.BytesIO):
-        source.seek(0)
-        wav_file = wave.open(source, "rb")
-    elif isinstance(source, torch.Tensor):
+    if isinstance(source, torch.Tensor):
         if source.dim() == 1:
             source = source.unsqueeze(0)
         return source, target_sample_rate
+
+    if isinstance(source, (str, Path)):
+        source_path = str(source)
+        try:
+            wav_file = wave.open(source_path, "rb")
+        except (wave.Error, Exception):
+            with open(source_path, "rb") as f:
+                raw_bytes = f.read()
+            wav_bytes = _convert_to_wav_bytes(raw_bytes, target_sample_rate)
+            wav_file = wave.open(io.BytesIO(wav_bytes), "rb")
+    elif isinstance(source, bytes):
+        try:
+            wav_file = wave.open(io.BytesIO(source), "rb")
+        except wave.Error:
+            wav_bytes = _convert_to_wav_bytes(source, target_sample_rate)
+            wav_file = wave.open(io.BytesIO(wav_bytes), "rb")
+    elif isinstance(source, io.BytesIO):
+        source.seek(0)
+        source_bytes = source.read()
+        try:
+            wav_file = wave.open(io.BytesIO(source_bytes), "rb")
+        except wave.Error:
+            wav_bytes = _convert_to_wav_bytes(source_bytes, target_sample_rate)
+            wav_file = wave.open(io.BytesIO(wav_bytes), "rb")
     else:
         raise ValueError(f"Unsupported source type for WAV reading: {type(source)}")
 

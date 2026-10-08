@@ -1,11 +1,12 @@
 """Main FastAPI application for NeuroMeet AI."""
 
 from __future__ import annotations
+from contextlib import asynccontextmanager
 import json
 import logging
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from fastapi import FastAPI, File, HTTPException, UploadFile, status
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -36,12 +37,22 @@ logger = logging.getLogger("neuromeet.api")
 
 cfg = load_config()
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("Starting NeuroMeet AI server...")
+    # Pre-warm pipeline
+    _ = get_pipeline()
+    logger.info("NeuroMeet pipeline ready.")
+    yield
+
+
 app = FastAPI(
     title="NeuroMeet API",
     description="Enterprise Deep Learning Framework for Meeting Speech Diarization, Summarization, and Action Items.",
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
+    lifespan=lifespan,
 )
 
 # Enable CORS for local web studio and browser extensions
@@ -54,14 +65,6 @@ app.add_middleware(
 )
 
 meeting_service = MeetingService()
-
-
-@app.on_event("startup")
-async def startup_event() -> None:
-    logger.info("Starting NeuroMeet AI server...")
-    # Pre-warm pipeline
-    _ = get_pipeline()
-    logger.info("NeuroMeet pipeline ready.")
 
 
 @app.get("/health", response_model=SystemHealthResponse, tags=["Health"])
@@ -98,7 +101,7 @@ async def process_transcript(req: ProcessTranscriptRequest) -> MeetingAnalysisRe
 @app.post("/api/v1/meetings/process-audio", response_model=MeetingAnalysisResponse, tags=["Meeting Analysis"])
 async def process_audio(
     file: UploadFile = File(...),
-    title: Optional[str] = "Audio Meeting Analysis",
+    title: Optional[str] = Form(None),
 ) -> MeetingAnalysisResponse:
     """Processes uploaded audio (WAV, MP3, etc.) through VAD, Diarization, SpeechCTC, and Meeting Intelligence."""
     pipeline = get_pipeline()
@@ -108,7 +111,8 @@ async def process_audio(
         raise HTTPException(status_code=400, detail="Uploaded file is empty.")
 
     try:
-        result = pipeline.process_audio(contents, title=title or file.filename or "Audio Meeting Analysis")
+        effective_title = title or file.filename or "Audio Meeting Analysis"
+        result = pipeline.process_audio(contents, title=effective_title)
         return MeetingAnalysisResponse(**result.to_dict())
     except Exception as e:
         logger.error(f"Error processing audio: {e}", exc_info=True)

@@ -23,6 +23,39 @@ def test_wav_read_write_roundtrip() -> None:
     assert diff < 0.01
 
 
+def test_wav_read_write_filepath(tmp_path) -> None:
+    orig_wav = generate_synthetic_audio(duration_sec=1.0, sample_rate=16000, speaker_id=2)
+    wav_path = tmp_path / "test_sample.wav"
+    write_wav(wav_path, orig_wav, sample_rate=16000)
+
+    # Read using string and Path
+    read_str, sr_str = read_wav(str(wav_path), target_sample_rate=16000)
+    read_path, sr_path = read_wav(wav_path, target_sample_rate=16000)
+
+    assert sr_str == 16000 and sr_path == 16000
+    assert read_str.shape == orig_wav.shape
+    assert read_path.shape == orig_wav.shape
+
+
+def test_read_wav_webm_format() -> None:
+    import subprocess
+    orig_wav = generate_synthetic_audio(duration_sec=1.0, sample_rate=16000, speaker_id=1)
+    buf = io.BytesIO()
+    write_wav(buf, orig_wav, sample_rate=16000)
+
+    proc = subprocess.run(
+        ["ffmpeg", "-y", "-i", "pipe:0", "-f", "webm", "-c:a", "libopus", "pipe:1"],
+        input=buf.getvalue(),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        check=True,
+    )
+    webm_bytes = proc.stdout
+    recovered, sr = read_wav(webm_bytes, target_sample_rate=16000)
+    assert sr == 16000
+    assert recovered.shape == (1, 16000)
+
+
 def test_resample_waveform() -> None:
     wav_8k = torch.randn(1, 8000)
     wav_16k = resample_waveform(wav_8k, orig_sr=8000, target_sr=16000)

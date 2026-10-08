@@ -356,17 +356,26 @@ Charlie: Excellent, let's keep to this schedule."></textarea>
 
       try {
         const res = await fetch(`/api/v1/meetings/sample/${id}`);
-        if (!res.ok) throw new Error("Failed to load scenario");
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.detail || "Failed to load scenario " + id);
+        }
         const data = await res.json();
         renderMeeting(data);
       } catch (err) {
-        console.error("API Error, falling back to simulated scenario:", err);
+        console.error("API Error loading scenario:", err);
+        alert("Scenario loading failed: " + err.message);
       }
     }
 
     function renderMeeting(data) {
+      if (!data || !Array.isArray(data.turns)) {
+        console.error("Invalid meeting data structure:", data);
+        alert(data?.detail || "Received invalid response from meeting service.");
+        return;
+      }
       currentMeetingData = data;
-      document.getElementById("meetingTitle").innerText = data.title;
+      document.getElementById("meetingTitle").innerText = data.title || "Meeting Intelligence Session";
       document.getElementById("turnCountBadge").innerText = `${data.turns.length} Turns`;
 
       // 1. Render Diarization Timeline
@@ -610,18 +619,25 @@ Charlie: Excellent, let's keep to this schedule."></textarea>
     }
 
     async function uploadRecordedAudio() {
-      const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+      const mime = mediaRecorder?.mimeType || "audio/webm";
+      const ext = mime.includes("webm") ? "webm" : (mime.includes("ogg") ? "ogg" : "wav");
+      const audioBlob = new Blob(audioChunks, { type: mime });
       const formData = new FormData();
-      formData.append("file", audioBlob, "recording.wav");
+      formData.append("file", audioBlob, `recording.${ext}`);
       formData.append("title", "Live Recorded Meeting Session");
 
       document.getElementById("systemStatus").innerText = "Diarizing & Transcribing Live Audio...";
       try {
         const res = await fetch("/api/v1/meetings/process-audio", { method: "POST", body: formData });
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.detail || `Server returned error status ${res.status}`);
+        }
         const data = await res.json();
         renderMeeting(data);
         document.getElementById("systemStatus").innerText = "Live Audio Processed Successfully";
       } catch (err) {
+        document.getElementById("systemStatus").innerText = "Audio Processing Error";
         alert("Failed to analyze audio stream: " + err.message);
       }
     }
@@ -636,10 +652,15 @@ Charlie: Excellent, let's keep to this schedule."></textarea>
       document.getElementById("systemStatus").innerText = "Analyzing Uploaded Audio...";
       try {
         const res = await fetch("/api/v1/meetings/process-audio", { method: "POST", body: formData });
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.detail || `Server returned error status ${res.status}`);
+        }
         const data = await res.json();
         renderMeeting(data);
         document.getElementById("systemStatus").innerText = "Audio File Ready";
       } catch (err) {
+        document.getElementById("systemStatus").innerText = "Audio Processing Error";
         alert("Audio processing failed: " + err.message);
       }
     }
@@ -660,10 +681,15 @@ Charlie: Excellent, let's keep to this schedule."></textarea>
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ title, transcript: text }),
         });
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.detail || `Server returned error status ${res.status}`);
+        }
         const data = await res.json();
         renderMeeting(data);
         document.getElementById("systemStatus").innerText = "Meeting Intelligence Ready";
       } catch (e) {
+        document.getElementById("systemStatus").innerText = "Transcript Processing Error";
         alert("Error processing transcript: " + e.message);
       }
     }
