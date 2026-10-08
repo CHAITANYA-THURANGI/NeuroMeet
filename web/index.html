@@ -3,156 +3,185 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NeuroMeet AI — Deep Learning Meeting Assistant</title>
+  <title>NeuroMeet AI — Enterprise Meeting Intelligence</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
   <style>
     :root {
-      --bg-dark: #0a0f1d;
-      --bg-card: #131d31;
-      --bg-card-hover: #1a2742;
-      --border-color: #233554;
-      --text-main: #f1f5f9;
+      --bg-dark: #090d16;
+      --bg-surface: #0f172a;
+      --bg-card: #131d33;
+      --bg-card-hover: #18233e;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-focus: #38bdf8;
+      --text-main: #f8fafc;
       --text-muted: #94a3b8;
+      --text-dim: #64748b;
       --accent-blue: #38bdf8;
       --accent-indigo: #6366f1;
       --accent-emerald: #10b981;
       --accent-amber: #f59e0b;
       --accent-rose: #f43f5e;
-      --spk-1: #38bdf8;
-      --spk-2: #a855f7;
-      --spk-3: #10b981;
-      --spk-4: #f59e0b;
+      --spk-0: #38bdf8;
+      --spk-1: #a855f7;
+      --spk-2: #10b981;
+      --spk-3: #f59e0b;
+      --spk-4: #ec4899;
+      --spk-5: #06b6d4;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif; }
     body { background: var(--bg-dark); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
 
     /* Header */
-    header { background: rgba(19, 29, 49, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-color); padding: 14px 28px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 50; }
+    header { background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(14px); border-bottom: 1px solid var(--border-subtle); padding: 12px 28px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 50; }
     .logo-group { display: flex; align-items: center; gap: 12px; }
-    .logo-icon { font-size: 26px; }
-    .logo-title { font-size: 20px; font-weight: 700; background: linear-gradient(135deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .logo-badge { font-size: 11px; background: rgba(56, 189, 248, 0.15); color: var(--accent-blue); padding: 2px 8px; border-radius: 12px; border: 1px solid rgba(56, 189, 248, 0.3); font-weight: 600; }
-    .header-actions { display: flex; align-items: center; gap: 16px; }
-    .status-pill { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); background: rgba(255, 255, 255, 0.05); padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border-color); }
-    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-emerald); box-shadow: 0 0 8px var(--accent-emerald); }
-    .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); padding: 6px 14px; border-radius: 6px; font-size: 13px; cursor: pointer; transition: all 0.2s; text-decoration: none; }
-    .btn-ghost:hover { background: var(--bg-card-hover); color: var(--text-main); }
+    .logo-icon { font-size: 24px; }
+    .logo-title { font-size: 19px; font-weight: 700; letter-spacing: -0.3px; background: linear-gradient(135deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .logo-badge { font-size: 11px; background: rgba(56, 189, 248, 0.12); color: var(--accent-blue); padding: 3px 9px; border-radius: 20px; border: 1px solid rgba(56, 189, 248, 0.25); font-weight: 600; }
+    .header-actions { display: flex; align-items: center; gap: 12px; }
+    .status-pill { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-muted); background: rgba(255, 255, 255, 0.03); padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border-subtle); }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-emerald); box-shadow: 0 0 8px var(--accent-emerald); }
+    .btn-nav { background: rgba(255, 255, 255, 0.04); color: var(--text-muted); border: 1px solid var(--border-subtle); padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s; text-decoration: none; display: flex; align-items: center; gap: 6px; }
+    .btn-nav:hover { background: rgba(255, 255, 255, 0.08); color: var(--text-main); border-color: rgba(255, 255, 255, 0.15); }
 
     /* Main Container */
-    main { flex: 1; padding: 24px; max-width: 1600px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 20px; }
+    main { flex: 1; padding: 20px 28px; max-width: 1680px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 18px; }
 
     /* Control Toolbar */
-    .toolbar-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 18px 24px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; }
-    .scenario-picker { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .scenario-label { font-size: 13px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-    .btn-scenario { background: rgba(255, 255, 255, 0.04); color: var(--text-main); border: 1px solid var(--border-color); padding: 8px 14px; border-radius: 8px; font-size: 13px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
-    .btn-scenario:hover, .btn-scenario.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent-blue); color: var(--accent-blue); }
-    .action-controls { display: flex; align-items: center; gap: 10px; }
-    .btn-record { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
-    .btn-record:hover { filter: brightness(1.1); }
+    .toolbar-card { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px 20px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px; }
+    .scenario-picker { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .scenario-label { font-size: 11px; color: var(--text-dim); font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; margin-right: 4px; }
+    .btn-scenario { background: rgba(255, 255, 255, 0.03); color: var(--text-muted); border: 1px solid var(--border-subtle); padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+    .btn-scenario:hover, .btn-scenario.active { background: rgba(56, 189, 248, 0.12); border-color: var(--accent-blue); color: var(--accent-blue); }
+    .action-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .select-lang { background: #070d18; color: #cbd5e1; border: 1px solid var(--border-subtle); border-radius: 8px; padding: 7px 12px; font-size: 12px; outline: none; cursor: pointer; transition: 0.15s; }
+    .select-lang:focus { border-color: var(--accent-blue); }
+    .btn-record { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25); }
+    .btn-record:hover { filter: brightness(1.08); }
     .btn-record.recording { animation: pulse-red 1.5s infinite; }
-    @keyframes pulse-red { 0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 50% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } }
-    .btn-upload { background: var(--bg-card-hover); color: var(--text-main); border: 1px solid var(--border-color); padding: 9px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; }
+    @keyframes pulse-red { 0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); } }
+    .btn-screen { background: linear-gradient(135deg, #6366f1, #3b82f6); color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
+    .btn-screen:hover { filter: brightness(1.08); }
+    .btn-upload { background: rgba(255, 255, 255, 0.05); color: var(--text-main); border: 1px solid var(--border-subtle); padding: 8px 14px; border-radius: 8px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
     .btn-upload:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
 
     /* Audio Visualizer & Waveform */
-    #visualizer-panel { display: none; background: #0c1424; border: 1px solid var(--border-color); border-radius: 10px; padding: 14px; align-items: center; gap: 16px; }
-    #waveCanvas { flex: 1; height: 50px; background: #070d18; border-radius: 6px; }
-    .timer-badge { font-family: monospace; font-size: 16px; font-weight: bold; color: var(--accent-rose); min-width: 60px; }
+    #visualizer-panel { display: none; background: #070d18; border: 1px solid var(--border-subtle); border-radius: 10px; padding: 12px 18px; align-items: center; gap: 16px; }
+    #waveCanvas { flex: 1; height: 42px; background: #040811; border-radius: 6px; }
+    .timer-badge { font-family: monospace; font-size: 15px; font-weight: bold; color: var(--accent-rose); min-width: 50px; }
 
-    /* 2-Column Grid Layout */
-    .dashboard-grid { display: grid; grid-template-columns: 1fr 480px; gap: 20px; flex: 1; }
+    /* 2-Column Responsive Dashboard */
+    .dashboard-grid { display: grid; grid-template-columns: 1fr 500px; gap: 18px; flex: 1; min-height: 600px; }
     @media (max-width: 1200px) { .dashboard-grid { grid-template-columns: 1fr; } }
 
-    /* Cards */
-    .card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
-    .card-header { padding: 16px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.01); }
-    .card-title { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; color: var(--text-main); }
-    .card-body { padding: 20px; flex: 1; overflow-y: auto; }
+    /* Card Containers */
+    .card { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+    .card-header { padding: 14px 20px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.01); }
+    .card-title { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; color: var(--text-main); }
+    .card-body { padding: 18px 20px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
 
-    /* Diarization Timeline */
-    .diarization-bar { display: flex; height: 32px; border-radius: 6px; overflow: hidden; margin-bottom: 14px; background: #070d18; border: 1px solid var(--border-color); }
-    .diar-segment { height: 100%; transition: opacity 0.2s; cursor: pointer; position: relative; }
-    .diar-segment:hover { opacity: 0.8; }
-    .timeline-legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; margin-bottom: 18px; }
+    /* Diarization Bar */
+    .diarization-bar { display: flex; height: 26px; border-radius: 6px; overflow: hidden; background: #070d18; border: 1px solid var(--border-subtle); }
+    .diar-segment { height: 100%; transition: opacity 0.2s; cursor: pointer; }
+    .diar-segment:hover { opacity: 0.75; }
+    .timeline-legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 11px; margin-top: -6px; }
     .legend-item { display: flex; align-items: center; gap: 6px; color: var(--text-muted); }
-    .legend-color { width: 12px; height: 12px; border-radius: 3px; }
+    .legend-color { width: 10px; height: 10px; border-radius: 2px; }
 
-    /* Transcript Feed */
-    .transcript-feed { display: flex; flex-direction: column; gap: 12px; max-height: 540px; overflow-y: auto; padding-right: 6px; }
-    .turn-card { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px; transition: all 0.2s; }
-    .turn-card:hover { border-color: rgba(56, 189, 248, 0.4); background: rgba(255, 255, 255, 0.04); }
-    .turn-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .turn-speaker { font-weight: 600; font-size: 13px; display: flex; align-items: center; gap: 8px; }
-    .speaker-dot { width: 8px; height: 8px; border-radius: 50%; }
-    .turn-meta { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
-    .turn-text { font-size: 14px; color: #cbd5e1; line-height: 1.5; }
-    .turn-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; font-weight: 600; }
-    .tag-positive { background: rgba(16, 185, 129, 0.2); color: var(--accent-emerald); }
-    .tag-negative { background: rgba(244, 63, 94, 0.2); color: var(--accent-rose); }
-    .tag-neutral { background: rgba(148, 163, 184, 0.2); color: var(--text-muted); }
+    /* Search & Filter Toolbar for Long Transcripts */
+    .transcript-toolbar { display: flex; gap: 8px; align-items: center; }
+    .transcript-search { flex: 1; background: #070d18; border: 1px solid var(--border-subtle); border-radius: 6px; padding: 7px 12px; font-size: 12px; color: var(--text-main); outline: none; transition: 0.15s; }
+    .transcript-search:focus { border-color: var(--accent-blue); }
+    .search-counter { font-size: 11px; color: var(--text-dim); }
 
-    /* Q&A Assistant Drawer */
-    .qa-box { margin-top: 18px; border-top: 1px solid var(--border-color); padding-top: 16px; }
-    .qa-input-group { display: flex; gap: 8px; margin-bottom: 12px; }
-    .qa-input { flex: 1; background: #070d18; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 14px; color: var(--text-main); font-size: 13px; outline: none; }
-    .qa-input:focus { border-color: var(--accent-blue); }
-    .btn-qa { background: var(--accent-indigo); color: white; border: none; padding: 0 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
-    .qa-result-card { display: none; background: #0c1424; border: 1px solid rgba(99, 102, 241, 0.4); border-radius: 8px; padding: 14px; font-size: 13px; }
-    .qa-answer { color: #e2e8f0; margin-bottom: 10px; line-height: 1.4; }
-    .qa-citation { font-size: 11px; color: var(--text-muted); border-left: 2px solid var(--accent-indigo); padding-left: 8px; }
+    /* Transcript Scroll Feed */
+    .transcript-feed { display: flex; flex-direction: column; gap: 10px; max-height: 520px; overflow-y: auto; padding-right: 4px; }
+    .turn-card { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 12px 14px; transition: all 0.15s; }
+    .turn-card:hover { border-color: rgba(56, 189, 248, 0.35); background: rgba(255, 255, 255, 0.03); }
+    .turn-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .turn-speaker { font-weight: 600; font-size: 12px; display: flex; align-items: center; gap: 6px; }
+    .speaker-dot { width: 7px; height: 7px; border-radius: 50%; }
+    .turn-meta { font-size: 10px; color: var(--text-dim); display: flex; align-items: center; gap: 8px; font-family: monospace; }
+    .turn-text { font-size: 13.5px; color: #cbd5e1; line-height: 1.5; }
+    .turn-tag { font-size: 9px; padding: 2px 5px; border-radius: 3px; font-weight: 700; letter-spacing: 0.3px; }
+    .tag-hi { background: rgba(249, 115, 22, 0.15); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.3); }
+    .tag-te { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
+    .tag-en { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+    .translation-box { margin-top: 6px; padding: 6px 10px; background: rgba(99, 102, 241, 0.05); border-left: 2px solid var(--accent-indigo); border-radius: 4px; font-size: 12px; color: #94a3b8; line-height: 1.4; }
 
     /* Right Column: Tabbed Intelligence Panel */
-    .tabs-header { display: flex; background: rgba(255, 255, 255, 0.02); border-bottom: 1px solid var(--border-color); }
-    .tab-btn { flex: 1; padding: 12px 10px; background: transparent; border: none; color: var(--text-muted); font-size: 12px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; text-align: center; }
-    .tab-btn.active { color: var(--accent-blue); border-bottom-color: var(--accent-blue); background: rgba(56, 189, 248, 0.05); }
+    .tabs-header { display: flex; background: rgba(255, 255, 255, 0.02); border-bottom: 1px solid var(--border-subtle); }
+    .tab-btn { flex: 1; padding: 12px 10px; background: transparent; border: none; color: var(--text-muted); font-size: 12px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; text-align: center; }
+    .tab-btn.active { color: var(--accent-blue); border-bottom-color: var(--accent-blue); background: rgba(56, 189, 248, 0.04); }
 
-    /* Summary Tab */
-    .summary-section { margin-bottom: 20px; }
-    .summary-heading { font-size: 12px; font-weight: 700; color: var(--accent-blue); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
-    .summary-text { font-size: 14px; color: #cbd5e1; line-height: 1.6; }
-    .decisions-list { display: flex; flex-direction: column; gap: 8px; }
-    .decision-item { background: rgba(56, 189, 248, 0.06); border-left: 3px solid var(--accent-blue); padding: 10px 12px; font-size: 13px; border-radius: 0 6px 6px 0; }
+    /* Executive Brief Tab */
+    .summary-section { margin-bottom: 16px; }
+    .summary-heading { font-size: 11px; font-weight: 700; color: var(--accent-blue); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.6px; display: flex; justify-content: space-between; align-items: center; }
+    .summary-text { font-size: 13.5px; color: #cbd5e1; line-height: 1.6; }
+    .decisions-list { display: flex; flex-direction: column; gap: 7px; }
+    .decision-item { background: rgba(56, 189, 248, 0.04); border-left: 3px solid var(--accent-blue); padding: 9px 12px; font-size: 12.5px; border-radius: 0 6px 6px 0; color: #e2e8f0; line-height: 1.4; }
     .topic-badges { display: flex; flex-wrap: wrap; gap: 6px; }
-    .topic-pill { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); padding: 4px 10px; border-radius: 20px; font-size: 12px; color: var(--text-muted); }
+    .topic-pill { background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-subtle); padding: 4px 9px; border-radius: 20px; font-size: 11.5px; color: var(--text-muted); }
+
+    /* Long Meeting Chapters Breakdown */
+    .chapters-list { display: flex; flex-direction: column; gap: 8px; }
+    .chapter-card { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 10px 12px; }
+    .chapter-title { font-size: 12px; font-weight: 700; color: #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+    .chapter-summary { font-size: 12px; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
 
     /* Action Items Tab */
-    .actions-list { display: flex; flex-direction: column; gap: 10px; }
-    .action-row { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
-    .action-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
-    .action-checkbox-group { display: flex; align-items: flex-start; gap: 10px; flex: 1; }
+    .actions-list { display: flex; flex-direction: column; gap: 9px; }
+    .action-row { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 7px; transition: 0.15s; }
+    .action-row:hover { border-color: rgba(255, 255, 255, 0.15); background: rgba(255, 255, 255, 0.03); }
+    .action-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+    .action-checkbox-group { display: flex; align-items: flex-start; gap: 9px; flex: 1; }
     .action-task { font-size: 13px; font-weight: 600; color: #f1f5f9; line-height: 1.4; }
-    .action-meta { display: flex; gap: 10px; font-size: 11px; color: var(--text-muted); }
+    .action-meta { display: flex; gap: 12px; font-size: 11px; color: var(--text-muted); }
     .prio-badge { padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
-    .prio-urgent { background: rgba(244, 63, 94, 0.2); color: var(--accent-rose); border: 1px solid rgba(244, 63, 94, 0.3); }
-    .prio-high { background: rgba(245, 158, 11, 0.2); color: var(--accent-amber); border: 1px solid rgba(245, 158, 11, 0.3); }
-    .prio-medium { background: rgba(56, 189, 248, 0.2); color: var(--accent-blue); border: 1px solid rgba(56, 189, 248, 0.3); }
-    .prio-low { background: rgba(16, 185, 129, 0.2); color: var(--accent-emerald); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .prio-urgent { background: rgba(244, 63, 94, 0.15); color: var(--accent-rose); border: 1px solid rgba(244, 63, 94, 0.3); }
+    .prio-high { background: rgba(245, 158, 11, 0.15); color: var(--accent-amber); border: 1px solid rgba(245, 158, 11, 0.3); }
+    .prio-medium { background: rgba(56, 189, 248, 0.15); color: var(--accent-blue); border: 1px solid rgba(56, 189, 248, 0.3); }
+    .prio-low { background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border: 1px solid rgba(16, 185, 129, 0.3); }
 
-    /* Analytics Tab */
-    .health-score-card { background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(99, 102, 241, 0.1)); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 10px; padding: 18px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-    .score-circle { width: 68px; height: 68px; border-radius: 50%; border: 4px solid var(--accent-blue); display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 800; font-size: 22px; color: var(--accent-blue); }
-    .score-label { font-size: 9px; color: var(--text-muted); }
-    .analytics-section { margin-bottom: 20px; }
-    .talktime-bars { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+    /* Health & Analytics Tab */
+    .health-score-card { background: linear-gradient(135deg, rgba(56, 189, 248, 0.08), rgba(99, 102, 241, 0.08)); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 10px; padding: 16px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .score-circle { width: 62px; height: 62px; border-radius: 50%; border: 3px solid var(--accent-blue); display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 800; font-size: 20px; color: var(--accent-blue); }
+    .score-label { font-size: 8px; color: var(--text-muted); }
+    .talktime-bars { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
     .talktime-row { display: flex; align-items: center; gap: 10px; font-size: 12px; }
     .talktime-name { width: 110px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-muted); }
-    .talktime-bar-bg { flex: 1; height: 10px; background: #070d18; border-radius: 5px; overflow: hidden; }
-    .talktime-bar-fill { height: 100%; border-radius: 5px; }
-    .talktime-pct { width: 40px; text-align: right; font-weight: 600; color: #f1f5f9; }
+    .talktime-bar-bg { flex: 1; height: 8px; background: #070d18; border-radius: 4px; overflow: hidden; }
+    .talktime-bar-fill { height: 100%; border-radius: 4px; }
+    .talktime-pct { width: 36px; text-align: right; font-weight: 600; color: #f1f5f9; font-size: 11px; }
+
+    /* AI Q&A Tab */
+    .qa-quick-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .qa-chip { background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-subtle); color: var(--text-muted); padding: 4px 10px; border-radius: 14px; font-size: 11px; cursor: pointer; transition: 0.15s; }
+    .qa-chip:hover { border-color: var(--accent-indigo); color: #c7d2fe; }
+    .qa-input-group { display: flex; gap: 8px; margin-bottom: 12px; }
+    .qa-input { flex: 1; background: #070d18; border: 1px solid var(--border-subtle); border-radius: 8px; padding: 9px 12px; color: var(--text-main); font-size: 12.5px; outline: none; transition: 0.15s; }
+    .qa-input:focus { border-color: var(--accent-indigo); }
+    .btn-qa { background: var(--accent-indigo); color: white; border: none; padding: 0 16px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; }
+    .qa-result-card { display: none; background: #070d18; border: 1px solid rgba(99, 102, 241, 0.35); border-radius: 8px; padding: 14px; font-size: 12.5px; }
+    .qa-answer { color: #f1f5f9; margin-bottom: 8px; line-height: 1.5; }
+    .qa-citation { font-size: 11px; color: var(--text-muted); border-left: 2px solid var(--accent-indigo); padding-left: 8px; }
 
     /* Export Bar */
-    .export-bar { display: flex; gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-color); }
-    .btn-export { flex: 1; background: rgba(255, 255, 255, 0.05); color: var(--text-main); border: 1px solid var(--border-color); padding: 8px; border-radius: 6px; font-size: 12px; cursor: pointer; text-align: center; transition: 0.2s; }
-    .btn-export:hover { background: var(--bg-card-hover); border-color: var(--accent-blue); color: var(--accent-blue); }
+    .export-bar { display: flex; gap: 8px; margin-top: auto; padding-top: 14px; border-top: 1px solid var(--border-subtle); }
+    .btn-export { flex: 1; background: rgba(255, 255, 255, 0.03); color: var(--text-muted); border: 1px solid var(--border-subtle); padding: 7px; border-radius: 6px; font-size: 11px; font-weight: 500; cursor: pointer; text-align: center; transition: 0.15s; }
+    .btn-export:hover { background: rgba(255, 255, 255, 0.07); color: var(--text-main); border-color: rgba(255, 255, 255, 0.15); }
+
+    /* Floating Toast Notification */
+    #toast-notification { position: fixed; bottom: 24px; right: 24px; background: #0f172a; border: 1px solid var(--accent-blue); color: var(--text-main); padding: 10px 18px; border-radius: 8px; font-size: 12px; font-weight: 500; z-index: 1000; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5); display: none; align-items: center; gap: 8px; animation: slide-in 0.2s ease-out; }
+    @keyframes slide-in { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
     /* Modal / Paste transcript */
     #transcriptModal { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); z-index: 100; align-items: center; justify-content: center; }
-    .modal-content { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; width: 90%; max-width: 600px; padding: 24px; display: flex; flex-direction: column; gap: 14px; }
-    .modal-textarea { width: 100%; height: 200px; background: #070d18; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; color: var(--text-main); font-size: 13px; resize: vertical; }
+    .modal-content { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 12px; width: 90%; max-width: 620px; padding: 22px; display: flex; flex-direction: column; gap: 12px; }
+    .modal-textarea { width: 100%; height: 210px; background: #070d18; border: 1px solid var(--border-subtle); border-radius: 8px; padding: 12px; color: var(--text-main); font-size: 12.5px; resize: vertical; outline: none; font-family: monospace; }
+    .modal-textarea:focus { border-color: var(--accent-blue); }
 
     /* Footer */
-    footer { border-top: 1px solid var(--border-color); padding: 14px 28px; text-align: center; font-size: 12px; color: var(--text-muted); background: rgba(19, 29, 49, 0.6); }
+    footer { border-top: 1px solid var(--border-subtle); padding: 12px 28px; text-align: center; font-size: 11px; color: var(--text-dim); background: rgba(15, 23, 42, 0.7); }
   </style>
 </head>
 <body>
@@ -162,19 +191,18 @@
     <div class="logo-group">
       <span class="logo-icon">🧠</span>
       <div>
-        <div class="logo-title">NeuroMeet AI</div>
-        <div style="font-size: 11px; color: var(--text-muted);">Deep Learning Meeting Intelligence Studio</div>
+        <span class="logo-title">NeuroMeet</span>
       </div>
-      <span class="logo-badge">v1.0.0</span>
+      <span class="logo-badge">Enterprise AI</span>
     </div>
     <div class="header-actions">
       <div class="status-pill">
         <div class="status-dot"></div>
-        <span id="systemStatus">PyTorch & Models Ready</span>
+        <span id="systemStatus">Models & Engine Ready</span>
       </div>
-      <a href="/static/neuromeet-chrome-extension-v1.0.0.zip" download class="btn-ghost" title="Download Chrome Extension for Google Meet / Zoom / Teams">🧩 Chrome Extension</a>
-      <a href="/docs" target="_blank" class="btn-ghost">API Docs</a>
-      <button class="btn-ghost" onclick="openTranscriptModal()">Paste Transcript</button>
+      <a href="/static/neuromeet-chrome-extension-v1.0.0.zip" download class="btn-nav" title="Download Chrome Extension for Meet / Zoom / Teams">🧩 Chrome Extension</a>
+      <button class="btn-nav" onclick="openTranscriptModal()">📋 Paste Transcript</button>
+      <a href="/docs" target="_blank" class="btn-nav">API Docs</a>
     </div>
   </header>
 
@@ -183,15 +211,16 @@
     <!-- Scenario & Recording Toolbar -->
     <div class="toolbar-card">
       <div class="scenario-picker">
-        <span class="scenario-label">Quick Scenarios:</span>
+        <span class="scenario-label">Scenarios:</span>
         <button class="btn-scenario active" onclick="loadScenario('sprint_planning')">⚡ Sprint Planning</button>
+        <button class="btn-scenario" onclick="loadScenario('long_executive_townhall')">🏛️ Executive Town Hall (Long)</button>
         <button class="btn-scenario" onclick="loadScenario('multilingual_india_sync')">🇮🇳 Multilingual Sync (HI/TE/EN)</button>
         <button class="btn-scenario" onclick="loadScenario('tech_postmortem')">🚨 Post-Mortem Outage</button>
-        <button class="btn-scenario" onclick="loadScenario('board_strategy')">🏢 Executive Board</button>
+        <button class="btn-scenario" onclick="loadScenario('board_strategy')">🏢 Board Strategy</button>
         <button class="btn-scenario" onclick="loadScenario('client_discovery')">🤝 Client Discovery</button>
       </div>
       <div class="action-controls">
-        <select id="meetingLanguageSelect" style="background:#070d18; color:#cbd5e1; border:1px solid var(--border-color); border-radius:6px; padding:6px 10px; font-size:12px; outline:none; cursor:pointer;" title="Speech Recognition & Translation Target Language">
+        <select id="meetingLanguageSelect" class="select-lang" title="Speech Recognition & Translation Target Language">
           <option value="auto">🌐 Auto-Detect (HI / TE / EN)</option>
           <option value="en">🇬🇧 English</option>
           <option value="hi">🇮🇳 Hindi (हिन्दी)</option>
@@ -200,11 +229,11 @@
         <button id="recordBtn" class="btn-record" onclick="toggleRecording()">
           <span>🎙️</span> <span id="recordBtnText">Record Mic</span>
         </button>
-        <button id="screenShareBtn" class="btn-record" style="background: linear-gradient(135deg, #6366f1, #3b82f6);" onclick="toggleScreenShare()">
+        <button id="screenShareBtn" class="btn-screen" onclick="toggleScreenShare()">
           <span>🖥️</span> <span id="screenShareBtnText">Share Screen / Meet Tab</span>
         </button>
         <label class="btn-upload">
-          📂 Upload Audio / Video
+          <span>📂</span> Upload Audio / Video
           <input type="file" id="audioUploadInput" accept="audio/*,video/*,.mp4,.mkv,.webm,.mov,.avi,.wav,.mp3,.m4a,.ogg" style="display:none;" onchange="handleAudioUpload(event)">
         </label>
       </div>
@@ -214,7 +243,7 @@
     <div id="visualizer-panel">
       <span class="timer-badge" id="recordTimer">00:00</span>
       <canvas id="waveCanvas"></canvas>
-      <span style="font-size: 12px; color: var(--text-muted);">Live speech stream processing via Web Audio API...</span>
+      <span style="font-size: 11px; color: var(--text-muted);">Real-time speech stream processing via Web Audio API...</span>
     </div>
 
     <!-- Dashboard 2-Column Grid -->
@@ -226,51 +255,56 @@
             <span>🗣️</span>
             <span id="meetingTitle">Sprint 42 Planning — Stripe v3 Migration</span>
           </div>
-          <span style="font-size: 12px; color: var(--text-muted);" id="turnCountBadge">8 Turns</span>
+          <span style="font-size: 11px; color: var(--text-muted);" id="turnCountBadge">8 Turns • 🌐 EN</span>
         </div>
         <div class="card-body">
           <!-- Diarization Timeline Bar -->
-          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 6px;">Speaker Diarization Timeline (Interactive)</div>
+          <div style="font-size: 11px; color: var(--text-muted); display:flex; justify-content:space-between; align-items:center;">
+            <span>Speaker Diarization Timeline</span>
+            <span id="totalDurLabel" style="font-family:monospace; color:var(--text-dim);">48.0s</span>
+          </div>
           <div class="diarization-bar" id="diarizationTimeline"></div>
           <div class="timeline-legend" id="timelineLegend"></div>
 
+          <!-- Transcript Instant Search Bar -->
+          <div class="transcript-toolbar">
+            <input type="text" id="transcriptSearch" class="transcript-search" placeholder="🔍 Filter transcript by keyword or speaker..." oninput="filterTranscript(this.value)">
+            <span class="search-counter" id="searchCount"></span>
+          </div>
+
           <!-- Transcript Scroll Feed -->
           <div class="transcript-feed" id="transcriptFeed"></div>
-
-          <!-- Q&A Assistant -->
-          <div class="qa-box">
-            <div style="font-size: 12px; font-weight: 700; color: var(--accent-indigo); margin-bottom: 8px;">🤖 AI Meeting Q&A Assistant</div>
-            <div class="qa-input-group">
-              <input type="text" id="qaInput" class="qa-input" placeholder="Ask anything (e.g. 'Who is fixing the webhook?', 'What was decided?')" onkeydown="if(event.key==='Enter')askQuestion()">
-              <button class="btn-qa" onclick="askQuestion()">Ask</button>
-            </div>
-            <div id="qaResult" class="qa-result-card">
-              <div id="qaAnswer" class="qa-answer"></div>
-              <div id="qaCitation" class="qa-citation"></div>
-            </div>
-          </div>
         </div>
       </div>
 
-      <!-- Right Column: Tabs (Summary, Action Items, Analytics) -->
+      <!-- Right Column: Tabs (Brief, Action Items, Analytics, Q&A) -->
       <div class="card">
         <div class="tabs-header">
-          <button class="tab-btn active" onclick="switchTab('summary')">🎯 Summary & Decisions</button>
+          <button class="tab-btn active" onclick="switchTab('summary')">🎯 Executive Brief</button>
           <button class="tab-btn" onclick="switchTab('actions')">📋 Action Items (<span id="actionBadge">3</span>)</button>
-          <button class="tab-btn" onclick="switchTab('analytics')">📊 Health & Dynamics</button>
+          <button class="tab-btn" onclick="switchTab('analytics')">📊 Dynamics</button>
+          <button class="tab-btn" onclick="switchTab('qa')">🤖 AI Q&A</button>
         </div>
         <div class="card-body">
 
-          <!-- Tab 1: Summary -->
+          <!-- Tab 1: Summary & Chapters -->
           <div id="tab-summary">
             <div class="summary-section">
               <div class="summary-heading">Executive TL;DR</div>
               <p class="summary-text" id="execSummaryText">Loading summary...</p>
             </div>
+
+            <!-- Structured Chapters Breakdown -->
+            <div class="summary-section" id="chaptersSection" style="display:none;">
+              <div class="summary-heading">Agenda Chapters & Phases</div>
+              <div class="chapters-list" id="chaptersList"></div>
+            </div>
+
             <div class="summary-section">
               <div class="summary-heading">Key Decisions Agreed</div>
               <div class="decisions-list" id="decisionsList"></div>
             </div>
+
             <div class="summary-section">
               <div class="summary-heading">Discussion Topics</div>
               <div class="topic-badges" id="topicsList"></div>
@@ -279,6 +313,10 @@
 
           <!-- Tab 2: Action Items -->
           <div id="tab-actions" style="display: none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+              <span style="font-size:11px; color:var(--text-muted); font-weight:600; text-transform:uppercase;">Extracted Commitments</span>
+              <button class="btn-nav" style="font-size:11px; padding:4px 8px;" onclick="copyActionItems()">📋 Copy Tasks</button>
+            </div>
             <div class="actions-list" id="actionItemsList"></div>
           </div>
 
@@ -286,8 +324,8 @@
           <div id="tab-analytics" style="display: none;">
             <div class="health-score-card">
               <div>
-                <div style="font-size: 12px; color: var(--accent-blue); font-weight: bold;">MEETING HEALTH SCORE</div>
-                <div id="healthCategory" style="font-size: 15px; font-weight: 700; color: #f1f5f9; margin: 4px 0;">Highly Productive</div>
+                <div style="font-size: 11px; color: var(--accent-blue); font-weight: bold; letter-spacing:0.5px;">MEETING HEALTH SCORE</div>
+                <div id="healthCategory" style="font-size: 14px; font-weight: 700; color: #f1f5f9; margin: 3px 0;">Highly Productive</div>
                 <div id="healthSubscores" style="font-size: 11px; color: var(--text-muted);">Participation: 22/25 | Actionability: 32/35</div>
               </div>
               <div class="score-circle">
@@ -296,23 +334,41 @@
               </div>
             </div>
 
-            <div class="analytics-section">
+            <div class="summary-section">
               <div class="summary-heading">Talk-Time Distribution</div>
               <div class="talktime-bars" id="talktimeBars"></div>
             </div>
 
-            <div class="analytics-section">
+            <div class="summary-section">
               <div class="summary-heading">AI Coach Recommendations</div>
-              <ul id="coachRecs" style="font-size: 13px; color: #cbd5e1; padding-left: 18px; line-height: 1.5;"></ul>
+              <ul id="coachRecs" style="font-size: 12.5px; color: #cbd5e1; padding-left: 18px; line-height: 1.5;"></ul>
+            </div>
+          </div>
+
+          <!-- Tab 4: AI Meeting Q&A Assistant -->
+          <div id="tab-qa" style="display: none;">
+            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Ask anything about the meeting:</div>
+            <div class="qa-quick-chips">
+              <span class="qa-chip" onclick="setAndAsk('What decisions were agreed upon?')">What decisions were made?</span>
+              <span class="qa-chip" onclick="setAndAsk('Who has action items and what are their deadlines?')">Who has action items?</span>
+              <span class="qa-chip" onclick="setAndAsk('What was the main topic discussed?')">Main topic discussed</span>
+            </div>
+            <div class="qa-input-group">
+              <input type="text" id="qaInput" class="qa-input" placeholder="Ask a question..." onkeydown="if(event.key==='Enter')askQuestion()">
+              <button class="btn-qa" onclick="askQuestion()">Ask</button>
+            </div>
+            <div id="qaResult" class="qa-result-card">
+              <div id="qaAnswer" class="qa-answer"></div>
+              <div id="qaCitation" class="qa-citation"></div>
             </div>
           </div>
 
           <!-- Export Actions -->
           <div class="export-bar">
             <button class="btn-export" onclick="exportData('markdown')">📄 Markdown</button>
-            <button class="btn-export" onclick="exportData('html')">🖨️ HTML Report</button>
-            <button class="btn-export" onclick="exportData('json')">📦 JSON Data</button>
-            <button class="btn-export" onclick="copyFormattedMinutes()">📋 Copy to Clipboard</button>
+            <button class="btn-export" onclick="exportData('html')">🖨️ HTML</button>
+            <button class="btn-export" onclick="exportData('json')">📦 JSON</button>
+            <button class="btn-export" onclick="copyFormattedMinutes()">📋 Copy Minutes</button>
           </div>
         </div>
       </div>
@@ -323,27 +379,33 @@
   <div id="transcriptModal">
     <div class="modal-content">
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h3 style="font-size:16px;">Paste Meeting Transcript</h3>
+        <h3 style="font-size:15px; font-weight:700;">Paste Meeting Transcript</h3>
         <button style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;" onclick="closeTranscriptModal()">&times;</button>
       </div>
-      <input type="text" id="customTitleInput" class="qa-input" placeholder="Meeting Title (e.g., Q3 Strategy Review)">
-      <textarea id="customTranscriptInput" class="modal-textarea" placeholder="Paste dialogue here... Format:
-Alice: We agreed to launch the beta next month.
-Bob: I will handle the database deployment by Friday.
-Charlie: Excellent, let's keep to this schedule."></textarea>
+      <input type="text" id="customTitleInput" class="qa-input" placeholder="Meeting Title (e.g., Extended Q4 Strategy Review)">
+      <textarea id="customTranscriptInput" class="modal-textarea" placeholder="Paste dialogue turns here:
+Sarah: We decided to expand cloud budget by 25% for OpenSearch.
+Marcus: I will deploy the connection limits by next Tuesday.
+Elena: I'll handle the customer onboarding survey by tomorrow afternoon."></textarea>
       <div style="display:flex; justify-content:flex-end; gap:8px;">
-        <button class="btn-ghost" onclick="closeTranscriptModal()">Cancel</button>
-        <button class="btn-qa" onclick="submitCustomTranscript()">Analyze Meeting</button>
+        <button class="btn-nav" onclick="closeTranscriptModal()">Cancel</button>
+        <button class="btn-record" style="background:var(--accent-blue);" onclick="submitCustomTranscript()">Analyze</button>
       </div>
     </div>
   </div>
 
+  <!-- Toast Notification -->
+  <div id="toast-notification">
+    <span>✅</span>
+    <span id="toast-text">Action completed</span>
+  </div>
+
   <!-- Footer -->
   <footer>
-    NeuroMeet AI &copy; 2026. Built with PyTorch, Conformer ASR, ECAPA-TDNN Diarization, and Hierarchical Attention Summarization.
+    NeuroMeet AI &copy; 2026 &bull; Enterprise Deep Learning Meeting Intelligence &bull; Conformer ASR &bull; ECAPA Diarization &bull; Hierarchical Attention
   </footer>
 
-  <!-- Script -->
+  <!-- Script Logic -->
   <script>
     let currentMeetingData = null;
     let isRecording = false;
@@ -355,12 +417,18 @@ Charlie: Excellent, let's keep to this schedule."></textarea>
     let recordStartTime = 0;
     let timerInterval = null;
 
-    const speakerColors = ["#38bdf8", "#a855f7", "#10b981", "#f59e0b", "#ec4899", "#6366f1"];
+    const speakerColors = ["#38bdf8", "#a855f7", "#10b981", "#f59e0b", "#ec4899", "#06b6d4"];
 
-    // Initialize
     window.addEventListener("DOMContentLoaded", () => {
       loadScenario('sprint_planning');
     });
+
+    function showToast(msg) {
+      const toast = document.getElementById("toast-notification");
+      document.getElementById("toast-text").innerText = msg;
+      toast.style.display = "flex";
+      setTimeout(() => { toast.style.display = "none"; }, 2500);
+    }
 
     async function loadScenario(id) {
       document.querySelectorAll(".btn-scenario").forEach(b => b.classList.remove("active"));
@@ -391,29 +459,50 @@ Charlie: Excellent, let's keep to this schedule."></textarea>
       const langs = (data.detected_languages && data.detected_languages.length) ? data.detected_languages : ["en"];
       const langStr = langs.map(l => l.toUpperCase()).join(" / ");
       document.getElementById("turnCountBadge").innerText = `${data.turns.length} Turns • 🌐 ${langStr}`;
+      if (document.getElementById("totalDurLabel")) {
+        document.getElementById("totalDurLabel").innerText = `${(data.total_duration_sec || 0).toFixed(1)}s`;
+      }
 
-      // 1. Render Diarization Timeline
+      // 1. Diarization Timeline
       renderDiarization(data.turns);
 
-      // 2. Render Transcript Feed
+      // 2. Transcript Feed
       renderTranscript(data.turns);
 
-      // 3. Render Executive Summary & Decisions
+      // 3. Executive Summary & Decisions
       document.getElementById("execSummaryText").innerText = data.minutes.executive_summary;
       const decList = document.getElementById("decisionsList");
-      decList.innerHTML = data.minutes.key_decisions.map(d => `<div class="decision-item">📌 ${d}</div>`).join("");
+      decList.innerHTML = (data.minutes.key_decisions || []).map(d => `<div class="decision-item">📌 ${d}</div>`).join("");
 
       const topList = document.getElementById("topicsList");
-      topList.innerHTML = data.minutes.discussion_topics.map(t => `<span class="topic-pill">🏷️ ${t}</span>`).join("");
+      topList.innerHTML = (data.minutes.discussion_topics || []).map(t => `<span class="topic-pill">🏷️ ${t}</span>`).join("");
 
-      // 4. Render Action Items
+      // 4. Chapters Section (for long meetings)
+      const chaptersSec = document.getElementById("chaptersSection");
+      const chaptersList = document.getElementById("chaptersList");
+      if (data.minutes.chapters && data.minutes.chapters.length > 1) {
+        chaptersSec.style.display = "block";
+        chaptersList.innerHTML = data.minutes.chapters.map(c => `
+          <div class="chapter-card">
+            <div class="chapter-title">
+              <span>${c.title}</span>
+              <span style="font-size:10px; color:var(--text-dim); font-family:monospace; cursor:pointer;" onclick="highlightTurn(${c.start_turn})">Turns #${c.start_turn + 1}–#${c.end_turn + 1} &rarr;</span>
+            </div>
+            <div class="chapter-summary">${c.summary}</div>
+          </div>
+        `).join("");
+      } else {
+        chaptersSec.style.display = "none";
+      }
+
+      // 5. Action Items
       document.getElementById("actionBadge").innerText = data.action_items.length;
       const actList = document.getElementById("actionItemsList");
       actList.innerHTML = data.action_items.map(a => `
         <div class="action-row">
           <div class="action-top">
             <div class="action-checkbox-group">
-              <input type="checkbox" style="margin-top:3px; cursor:pointer;">
+              <input type="checkbox" style="margin-top:2px; cursor:pointer;">
               <span class="action-task">${a.task}</span>
             </div>
             <span class="prio-badge prio-${a.priority.toLowerCase()}">${a.priority}</span>
@@ -425,7 +514,7 @@ Charlie: Excellent, let's keep to this schedule."></textarea>
         </div>
       `).join("");
 
-      // 5. Render Health & Analytics
+      // 6. Health & Analytics
       const h = data.health;
       document.getElementById("healthScoreNum").innerText = h.overall_score;
       document.getElementById("healthGrade").innerText = `GRADE ${h.grade}`;
@@ -435,7 +524,7 @@ Charlie: Excellent, let's keep to this schedule."></textarea>
       const recs = document.getElementById("coachRecs");
       recs.innerHTML = h.recommendations.map(r => `<li>${r}</li>`).join("");
 
-      // Talk time bars
+      // Talk time distribution bars
       const part = data.participation;
       const bars = document.getElementById("talktimeBars");
       bars.innerHTML = Object.entries(part.talk_time_percentages).map(([spk, pct], i) => `
@@ -495,17 +584,17 @@ Charlie: Excellent, let's keep to this schedule."></textarea>
         const color = spkColorMap[t.speaker] || "#38bdf8";
         const lang = t.language || "en";
         const langBadges = {
-          "hi": '<span class="turn-tag" style="background:rgba(249,115,22,0.2);color:#fb923c;margin-left:6px;">🇮🇳 HI</span>',
-          "te": '<span class="turn-tag" style="background:rgba(168,85,247,0.2);color:#c084fc;margin-left:6px;">🇮🇳 TE</span>',
-          "en": '<span class="turn-tag" style="background:rgba(56,189,248,0.2);color:#38bdf8;margin-left:6px;">🇬🇧 EN</span>',
+          "hi": '<span class="turn-tag tag-hi">HI</span>',
+          "te": '<span class="turn-tag tag-te">TE</span>',
+          "en": '<span class="turn-tag tag-en">EN</span>',
         };
-        const langBadge = langBadges[lang] || `<span class="turn-tag tag-neutral">${lang.toUpperCase()}</span>`;
+        const langBadge = langBadges[lang] || `<span class="turn-tag tag-en">${lang.toUpperCase()}</span>`;
         const translationHtml = (t.translation && t.translation.trim() !== t.text.trim()) 
-          ? `<div style="margin-top:6px;padding:6px 10px;background:rgba(255,255,255,0.03);border-left:2px solid #6366f1;border-radius:4px;font-size:12px;color:#94a3b8;"><span style="color:#818cf8;font-weight:600;">Translation:</span> ${t.translation}</div>` 
+          ? `<div class="translation-box"><strong style="color:#818cf8;">Translation:</strong> ${t.translation}</div>` 
           : '';
 
         return `
-          <div class="turn-card" id="turn-${idx}">
+          <div class="turn-card" id="turn-${idx}" data-speaker="${t.speaker.toLowerCase()}" data-text="${t.text.toLowerCase()}">
             <div class="turn-header">
               <div class="turn-speaker" style="color:${color}">
                 <div class="speaker-dot" style="background:${color}"></div>
@@ -524,14 +613,37 @@ Charlie: Excellent, let's keep to this schedule."></textarea>
       }).join("");
     }
 
+    function filterTranscript(query) {
+      const q = query.toLowerCase().trim();
+      const cards = document.querySelectorAll(".turn-card");
+      let visible = 0;
+      cards.forEach(card => {
+        const spk = card.getAttribute("data-speaker") || "";
+        const txt = card.getAttribute("data-text") || "";
+        if (!q || spk.includes(q) || txt.includes(q)) {
+          card.style.display = "block";
+          visible++;
+        } else {
+          card.style.display = "none";
+        }
+      });
+      const counter = document.getElementById("searchCount");
+      if (q) {
+        counter.innerText = `${visible} matches`;
+      } else {
+        counter.innerText = "";
+      }
+    }
+
     function highlightTurn(idx) {
       const el = document.getElementById(`turn-${idx}`);
       if (el) {
+        el.style.display = "block";
         el.scrollIntoView({ behavior: "smooth", block: "center" });
         el.style.borderColor = "var(--accent-blue)";
-        el.style.background = "rgba(56, 189, 248, 0.15)";
+        el.style.background = "rgba(56, 189, 248, 0.12)";
         setTimeout(() => {
-          el.style.borderColor = "var(--border-color)";
+          el.style.borderColor = "var(--border-subtle)";
           el.style.background = "rgba(255, 255, 255, 0.02)";
         }, 1500);
       }
@@ -543,6 +655,12 @@ Charlie: Excellent, let's keep to this schedule."></textarea>
       document.getElementById("tab-summary").style.display = name === "summary" ? "block" : "none";
       document.getElementById("tab-actions").style.display = name === "actions" ? "block" : "none";
       document.getElementById("tab-analytics").style.display = name === "analytics" ? "block" : "none";
+      document.getElementById("tab-qa").style.display = name === "qa" ? "block" : "none";
+    }
+
+    function setAndAsk(question) {
+      document.getElementById("qaInput").value = question;
+      askQuestion();
     }
 
     async function askQuestion() {
@@ -554,7 +672,7 @@ Charlie: Excellent, let's keep to this schedule."></textarea>
       const ansEl = document.getElementById("qaAnswer");
       const citEl = document.getElementById("qaCitation");
       resBox.style.display = "block";
-      ansEl.innerText = "Consulting neural meeting memory...";
+      ansEl.innerText = "Analyzing meeting memory with Dense Retriever...";
       citEl.innerText = "";
 
       try {
@@ -570,7 +688,7 @@ Charlie: Excellent, let's keep to this schedule."></textarea>
           citEl.innerText = `Citation: Turn #${c.turn_index + 1} (${c.speaker}) — Relevance: ${(c.score * 100).toFixed(0)}%`;
         }
       } catch (e) {
-        ansEl.innerText = "Error answering question.";
+        ansEl.innerText = "Error querying meeting memory.";
       }
     }
 
@@ -603,13 +721,13 @@ Charlie: Excellent, let's keep to this schedule."></textarea>
           timerInterval = setInterval(updateTimer, 1000);
           drawWaveform();
         } catch (err) {
-          alert("Microphone access denied or unsupported in browser: " + err.message);
+          alert("Microphone access denied or unsupported: " + err.message);
         }
       } else {
         isRecording = false;
         mediaRecorder.stop();
         btn.classList.remove("recording");
-        text.innerText = "Record Meeting";
+        text.innerText = "Record Mic";
         panel.style.display = "none";
         clearInterval(timerInterval);
         cancelAnimationFrame(animationId);
@@ -624,24 +742,30 @@ Charlie: Excellent, let's keep to this schedule."></textarea>
     }
 
     function drawWaveform() {
-      if (!isRecording || !analyser) return;
+      if (!isRecording) return;
       const canvas = document.getElementById("waveCanvas");
       const ctx = canvas.getContext("2d");
       const bufferLen = analyser.frequencyBinCount;
       const dataArray = new Uint8Array(bufferLen);
-      analyser.getByteFrequencyData(dataArray);
+      analyser.getByteTimeDomainData(dataArray);
 
-      ctx.fillStyle = "#070d18";
+      ctx.fillStyle = "#040811";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "#38bdf8";
+      ctx.beginPath();
 
-      const barWidth = (canvas.width / bufferLen) * 2.5;
+      const sliceWidth = canvas.width * 1.0 / bufferLen;
       let x = 0;
       for (let i = 0; i < bufferLen; i++) {
-        const barHeight = (dataArray[i] / 255) * canvas.height;
-        ctx.fillStyle = "#38bdf8";
-        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-        x += barWidth + 1;
+        const v = dataArray[i] / 128.0;
+        const y = v * canvas.height / 2;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+        x += sliceWidth;
       }
+      ctx.lineTo(canvas.width, canvas.height / 2);
+      ctx.stroke();
       animationId = requestAnimationFrame(drawWaveform);
     }
 
@@ -657,7 +781,7 @@ Charlie: Excellent, let's keep to this schedule."></textarea>
         formData.append("language", selLang);
       }
 
-      document.getElementById("systemStatus").innerText = "Diarizing & Transcribing Live Audio...";
+      document.getElementById("systemStatus").innerText = "Transcribing Live Audio...";
       try {
         const res = await fetch("/api/v1/meetings/process-audio", { method: "POST", body: formData });
         if (!res.ok) {
@@ -666,7 +790,8 @@ Charlie: Excellent, let's keep to this schedule."></textarea>
         }
         const data = await res.json();
         renderMeeting(data);
-        document.getElementById("systemStatus").innerText = "Live Audio Processed Successfully";
+        document.getElementById("systemStatus").innerText = "Audio Processed Successfully";
+        showToast("Audio meeting processed successfully!");
       } catch (err) {
         document.getElementById("systemStatus").innerText = "Audio Processing Error";
         alert("Failed to analyze audio stream: " + err.message);
@@ -684,7 +809,7 @@ Charlie: Excellent, let's keep to this schedule."></textarea>
         formData.append("language", selLang);
       }
 
-      document.getElementById("systemStatus").innerText = "Analyzing Uploaded Audio...";
+      document.getElementById("systemStatus").innerText = "Analyzing Uploaded Recording...";
       try {
         const res = await fetch("/api/v1/meetings/process-audio", { method: "POST", body: formData });
         if (!res.ok) {
@@ -693,7 +818,8 @@ Charlie: Excellent, let's keep to this schedule."></textarea>
         }
         const data = await res.json();
         renderMeeting(data);
-        document.getElementById("systemStatus").innerText = "Audio File Ready";
+        document.getElementById("systemStatus").innerText = "Meeting Ready";
+        showToast("Uploaded recording processed!");
       } catch (err) {
         document.getElementById("systemStatus").innerText = "Audio Processing Error";
         alert("Audio processing failed: " + err.message);
@@ -709,7 +835,7 @@ Charlie: Excellent, let's keep to this schedule."></textarea>
       if (!text) return;
       closeTranscriptModal();
 
-      document.getElementById("systemStatus").innerText = "Processing Neural Meeting Intelligence...";
+      document.getElementById("systemStatus").innerText = "Processing Meeting Intelligence...";
       try {
         const res = await fetch("/api/v1/meetings/process-transcript", {
           method: "POST",
@@ -722,14 +848,15 @@ Charlie: Excellent, let's keep to this schedule."></textarea>
         }
         const data = await res.json();
         renderMeeting(data);
-        document.getElementById("systemStatus").innerText = "Meeting Intelligence Ready";
+        document.getElementById("systemStatus").innerText = "Meeting Ready";
+        showToast("Transcript analyzed!");
       } catch (e) {
-        document.getElementById("systemStatus").innerText = "Transcript Processing Error";
+        document.getElementById("systemStatus").innerText = "Processing Error";
         alert("Error processing transcript: " + e.message);
       }
     }
 
-    // Live Screen & Tab Capture (Google Meet / Zoom / MS Teams)
+    // Screen Share Meeting Capture
     let screenRecorder = null;
     let screenStream = null;
     let screenChunks = [];
@@ -744,23 +871,15 @@ Charlie: Excellent, let's keep to this schedule."></textarea>
         try {
           screenStream = await navigator.mediaDevices.getDisplayMedia({
             video: true,
-            audio: {
-              echoCancellation: true,
-              noiseSuppression: true,
-              sampleRate: 44100,
-            }
+            audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 44100 }
           });
-
-          const audioTracks = screenStream.getAudioTracks();
-          if (audioTracks.length === 0) {
-            alert("Note: Remember to check 'Share tab audio' or 'Share system audio' in the browser prompt so NeuroMeet can hear the speakers in your call!");
-          }
 
           screenChunks = [];
           const mime = MediaRecorder.isTypeSupported("video/webm;codecs=vp9,opus") 
             ? "video/webm;codecs=vp9,opus" 
-            : "video/webm";
-          screenRecorder = new MediaRecorder(screenStream, { mimeType: mime });
+            : (MediaRecorder.isTypeSupported("video/webm") ? "video/webm" : "");
+
+          screenRecorder = new MediaRecorder(screenStream, mime ? { mimeType: mime } : {});
           screenRecorder.ondataavailable = e => { if (e.data.size > 0) screenChunks.push(e.data); };
           screenRecorder.onstop = uploadScreenRecording;
 
@@ -775,7 +894,7 @@ Charlie: Excellent, let's keep to this schedule."></textarea>
           panel.style.display = "flex";
           recordStartTime = Date.now();
           timerInterval = setInterval(updateTimer, 1000);
-          document.getElementById("systemStatus").innerText = "Recording Live Presentation & Meeting Audio...";
+          document.getElementById("systemStatus").innerText = "Recording Meeting Call...";
         } catch (err) {
           console.warn("Screen share cancelled or unsupported:", err);
         }
@@ -801,7 +920,7 @@ Charlie: Excellent, let's keep to this schedule."></textarea>
         formData.append("language", selLang);
       }
 
-      document.getElementById("systemStatus").innerText = "Diarizing & Transcribing Live Presentation Audio...";
+      document.getElementById("systemStatus").innerText = "Transcribing Live Presentation Audio...";
       try {
         const res = await fetch("/api/v1/meetings/process-audio", { method: "POST", body: formData });
         if (!res.ok) {
@@ -810,11 +929,20 @@ Charlie: Excellent, let's keep to this schedule."></textarea>
         }
         const data = await res.json();
         renderMeeting(data);
-        document.getElementById("systemStatus").innerText = "Presentation & Speech Processed Successfully";
+        document.getElementById("systemStatus").innerText = "Meeting Ready";
+        showToast("Screen audio processed!");
       } catch (err) {
         document.getElementById("systemStatus").innerText = "Processing Error";
         alert("Failed to analyze screen capture audio: " + err.message);
       }
+    }
+
+    function copyActionItems() {
+      if (!currentMeetingData?.action_items?.length) return;
+      const lines = currentMeetingData.action_items.map(a => `- [ ] **${a.task}** (Owner: ${a.assignee}, Due: ${a.deadline}, Priority: ${a.priority.toUpperCase()})`);
+      navigator.clipboard.writeText(lines.join("\n")).then(() => {
+        showToast("Action items copied as markdown checklist!");
+      });
     }
 
     function copyFormattedMinutes() {
@@ -822,14 +950,20 @@ Charlie: Excellent, let's keep to this schedule."></textarea>
       const m = currentMeetingData;
       let text = `# ${m.title}\n\n`;
       text += `## Executive Summary\n${m.minutes?.executive_summary || ""}\n\n`;
+      if (m.minutes?.chapters?.length > 1) {
+        text += `## Agenda Phases & Chapters\n`;
+        m.minutes.chapters.forEach(c => {
+          text += `### ${c.title} (Turns ${c.start_turn + 1}–${c.end_turn + 1})\n${c.summary}\n\n`;
+        });
+      }
       if (m.minutes?.key_decisions?.length) {
-        text += `## Key Decisions\n` + m.minutes.key_decisions.map(d => `- ${d}`).join("\n") + "\n\n";
+        text += `## Key Decisions\n` + m.minutes.key_decisions.map(d => `- 📌 ${d}`).join("\n") + "\n\n";
       }
       if (m.action_items?.length) {
-        text += `## Action Items\n` + m.action_items.map(a => `- [ ] **${a.task}** (Assignee: ${a.assignee}, Due: ${a.deadline}, Priority: ${a.priority})`).join("\n") + "\n\n";
+        text += `## Action Items\n` + m.action_items.map(a => `- [ ] **${a.task}** (Assignee: ${a.assignee}, Due: ${a.deadline}, Priority: ${a.priority.toUpperCase()})`).join("\n") + "\n\n";
       }
       navigator.clipboard.writeText(text).then(() => {
-        alert("Meeting minutes copied to clipboard! You can paste directly into Slack, Teams, or Email.");
+        showToast("Meeting minutes copied to clipboard!");
       }).catch(err => {
         alert("Could not copy to clipboard: " + err);
       });
@@ -850,6 +984,7 @@ Charlie: Excellent, let's keep to this schedule."></textarea>
         a.href = url;
         a.download = data.filename;
         a.click();
+        showToast(`Exported as ${format.toUpperCase()}`);
       } catch (e) {
         alert("Export failed: " + e.message);
       }

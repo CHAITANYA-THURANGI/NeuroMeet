@@ -130,6 +130,7 @@ async def summarize_transcript(req: SummarizeRequest) -> SummarizeResponse:
         executive_summary=result.minutes.executive_summary,
         key_decisions=result.minutes.key_decisions,
         discussion_topics=result.minutes.discussion_topics,
+        chapters=result.minutes.chapters,
         compression_ratio=result.minutes.compression_ratio,
     )
 

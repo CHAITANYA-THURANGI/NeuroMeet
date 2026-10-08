@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeuroMeet AI</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <div class="header">
+      <div class="title-wrap">
+        <span class="icon">🧠</span>
+        <span class="title">NeuroMeet</span>
+        <span class="badge">AI</span>
+      </div>
+      <span class="status-badge" id="backendBadge">Connecting...</span>
+    </div>
+
+    <!-- Live Status Card -->
+    <div class="card">
+      <div class="stat-row">
+        <span>Active Platform:</span>
+        <strong id="platformName">Scanning...</strong>
+      </div>
+      <div class="stat-row">
+        <span>Captured Turns:</span>
+        <strong id="turnCounter" style="color:#38bdf8; font-size:13px;">0</strong>
+      </div>
+      <div class="stat-row">
+        <span>Live Listening:</span>
+        <strong style="color:#10b981;">Ready</strong>
+      </div>
+    </div>
+
+    <!-- Quick Action Buttons -->
+    <div class="actions">
+      <button class="btn btn-primary" id="summarizeBtn">⚡ Generate Meeting Minutes</button>
+      <button class="btn btn-secondary" id="copyActionsBtn">📋 Copy Action Items</button>
+      <button class="btn btn-ghost" id="openStudioBtn">🚀 Open Web Studio &rarr;</button>
+    </div>
+
+    <!-- Quick Result Preview -->
+    <div id="quickResult" class="result-box" style="display:none;">
+      <div class="res-title" id="resTitle">Executive Brief:</div>
+      <div class="res-body" id="summaryPreview">Analyzing meeting turns...</div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      NeuroMeet AI &bull; Deep Learning Meeting Intelligence
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -58,24 +58,23 @@ class EnergyZCRVAD:
         if len(signal) < self.frame_len:
             return []
 
-        # Frame extraction
+        # Frame extraction (vectorized for fast execution on long audio files)
         num_frames = 1 + (len(signal) - self.frame_len) // self.hop_len
-        energies = np.zeros(num_frames, dtype=np.float32)
-        zcrs = np.zeros(num_frames, dtype=np.float32)
-
-        for i in range(num_frames):
-            start = i * self.hop_len
-            frame = signal[start : start + self.frame_len]
-
-            # Short-Time Root Mean Square (RMS) Energy
-            energies[i] = np.sqrt(np.mean(frame ** 2) + 1e-9)
-
-            # Zero-Crossing Rate
-            signs = np.sign(frame)
-            # Replace 0 with 1 to avoid false zeros
+        if num_frames > 0:
+            from numpy.lib.stride_tricks import as_strided
+            itemsize = signal.itemsize
+            frames = as_strided(
+                signal,
+                shape=(num_frames, self.frame_len),
+                strides=(self.hop_len * itemsize, itemsize),
+            )
+            energies = np.sqrt(np.mean(frames ** 2, axis=1) + 1e-9).astype(np.float32)
+            signs = np.sign(frames)
             signs[signs == 0] = 1
-            zcr = 0.5 * np.mean(np.abs(signs[1:] - signs[:-1]))
-            zcrs[i] = zcr
+            zcrs = (0.5 * np.mean(np.abs(signs[:, 1:] - signs[:, :-1]), axis=1)).astype(np.float32)
+        else:
+            energies = np.zeros(0, dtype=np.float32)
+            zcrs = np.zeros(0, dtype=np.float32)
 
         # Adaptive background noise estimation (10th percentile energy floor)
         ambient_energy = float(np.percentile(energies, 10)) if num_frames > 0 else 0.005

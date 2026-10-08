@@ -80,15 +80,21 @@ class SpeakerDiarizer:
         if not windows:
             return []
 
-        # 3. Extract speaker embeddings per window
+        # 3. Extract speaker embeddings per window (batched for high throughput on long audio)
         embeddings_list = []
-        for win in windows:
-            audio_t = win.waveform.to(self.device)
-            # LogMel extraction: [1, 80, T]
-            features = self.feature_extractor(audio_t)
-            # SpeakerNet embedding: [1, 192]
-            emb = self.speaker_net(features)
-            embeddings_list.append(emb.squeeze(0).cpu().numpy())
+        batch_size = 32
+        for i in range(0, len(windows), batch_size):
+            batch_wins = windows[i : i + batch_size]
+            waveforms = [w.waveform.squeeze() for w in batch_wins]
+            max_len = max(w.shape[-1] for w in waveforms)
+            padded = [
+                torch.nn.functional.pad(w, (0, max_len - w.shape[-1])) if w.shape[-1] < max_len else w
+                for w in waveforms
+            ]
+            batch_t = torch.stack(padded).to(self.device)
+            features = self.feature_extractor(batch_t)
+            embs = self.speaker_net(features)
+            embeddings_list.extend(embs.cpu().numpy())
 
         embeddings = np.array(embeddings_list, dtype=np.float32)
 

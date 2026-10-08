@@ -256,6 +256,75 @@ def generate_multilingual_india_sync() -> MeetingScenario:
     )
 
 
+def generate_long_executive_townhall() -> MeetingScenario:
+    """Long-duration Executive Town Hall & Strategic Review (24 turns across 5 executive leaders)."""
+    speakers = [
+        "Sarah (CEO)",
+        "Marcus (VP Engineering)",
+        "Elena (Head of Product)",
+        "David (Chief Revenue Officer)",
+        "Chloe (VP Operations)",
+    ]
+    turns = [
+        {"speaker": "Sarah (CEO)", "start_sec": 0.0, "end_sec": 8.0, "text": "Welcome everyone to our extended Q4 strategic roadmap alignment. Today we will evaluate our infrastructure scalability, enterprise pipeline, and operational budgeting."},
+        {"speaker": "David (Chief Revenue Officer)", "start_sec": 8.5, "end_sec": 17.0, "text": "Starting with commercial growth, our enterprise ARR grew 38% this quarter. However, prospective healthcare customers are blocked waiting on HIPAA compliance certification."},
+        {"speaker": "Chloe (VP Operations)", "start_sec": 17.5, "end_sec": 26.0, "text": "Regarding compliance, the external audit firm completed preliminary penetration testing last week. I will deliver the consolidated HIPAA readiness report and budget audit by Friday EOD."},
+        {"speaker": "Sarah (CEO)", "start_sec": 26.5, "end_sec": 32.0, "text": "Excellent Chloe. Moving on to engineering architecture, Marcus, how is our multi-region latency holding up?"},
+        {"speaker": "Marcus (VP Engineering)", "start_sec": 32.5, "end_sec": 42.0, "text": "Our European cluster is performing within SLA, but database connection spikes during peak US morning traffic are causing 2% queue saturation."},
+        {"speaker": "Elena (Head of Product)", "start_sec": 42.5, "end_sec": 51.0, "text": "Users are also requesting background meeting transcription with speaker search. We need to prioritize real-time diarization in the web client."},
+        {"speaker": "Marcus (VP Engineering)", "start_sec": 51.5, "end_sec": 60.5, "text": "I am going to migrate our primary search cluster to OpenSearch and deploy connection pool limits by next Tuesday."},
+        {"speaker": "Elena (Head of Product)", "start_sec": 61.0, "end_sec": 69.5, "text": "From product side, I'll handle the enterprise customer onboarding survey analysis and deliver UI wireframes by tomorrow afternoon."},
+        {"speaker": "David (Chief Revenue Officer)", "start_sec": 70.0, "end_sec": 79.0, "text": "If Elena delivers the prototypes this week, I will close the three Fortune 500 pilots before next month."},
+        {"speaker": "Sarah (CEO)", "start_sec": 79.5, "end_sec": 88.0, "text": "That is a huge milestone. We decided to increase our R&D cloud budget by 25% starting next sprint to fund the OpenSearch cluster."},
+        {"speaker": "Chloe (VP Operations)", "start_sec": 88.5, "end_sec": 96.0, "text": "I will coordinate with finance to approve the updated cloud allocation before Thursday morning."},
+        {"speaker": "Marcus (VP Engineering)", "start_sec": 96.5, "end_sec": 105.0, "text": "Regarding contractor access, I will enforce hardware security keys across all staging and production environments by next Monday."},
+        {"speaker": "Sarah (CEO)", "start_sec": 105.5, "end_sec": 113.0, "text": "Agreed. We agreed to mandate SOC2 Type II compliance audits across all contractors and third-party vendors."},
+        {"speaker": "Elena (Head of Product)", "start_sec": 113.5, "end_sec": 121.0, "text": "On telemetry, we should also track participant talk-time inequality metrics directly in our customer dashboard."},
+        {"speaker": "Marcus (VP Engineering)", "start_sec": 121.5, "end_sec": 129.0, "text": "That will be straightforward once our analytics event pipeline is streaming. I'll take the lead on the event schema by Wednesday."},
+        {"speaker": "David (Chief Revenue Officer)", "start_sec": 129.5, "end_sec": 137.0, "text": "Sales engineering team will need customer-facing one-pagers explaining our deep learning architecture and privacy guarantees."},
+        {"speaker": "Elena (Head of Product)", "start_sec": 137.5, "end_sec": 145.0, "text": "I will prepare the enterprise security architecture collateral and publish it to the sales portal by Thursday EOD."},
+        {"speaker": "Chloe (VP Operations)", "start_sec": 145.5, "end_sec": 152.0, "text": "I will schedule our quarterly executive offsite and send calendar invites to all department heads by tomorrow."},
+        {"speaker": "Sarah (CEO)", "start_sec": 152.5, "end_sec": 160.0, "text": "Regarding hiring, we decided to open four senior deep learning positions in North America and EMEA."},
+        {"speaker": "Chloe (VP Operations)", "start_sec": 160.5, "end_sec": 167.0, "text": "I will post the four senior ML engineering job requisitions on LinkedIn and Greenhouse by Friday noon."},
+        {"speaker": "Marcus (VP Engineering)", "start_sec": 167.5, "end_sec": 174.0, "text": "I will draft the technical interview assessment rubrics by Monday morning."},
+        {"speaker": "David (Chief Revenue Officer)", "start_sec": 174.5, "end_sec": 181.0, "text": "I will update the revenue forecasts reflecting the increased headcount and share them with the board by Wednesday."},
+        {"speaker": "Elena (Head of Product)", "start_sec": 181.5, "end_sec": 187.0, "text": "Looking forward to executing on the product milestones."},
+        {"speaker": "Sarah (CEO)", "start_sec": 187.5, "end_sec": 195.0, "text": "Thank you everyone for the alignment. We have clear ownership, strong momentum, and a shared vision for scale."},
+    ]
+    summary = "The Executive Town Hall reviewed commercial expansion, engineering infrastructure, product AI features, and operational hiring. David noted 38% ARR growth, while Chloe committed to delivering the HIPAA readiness report by Friday EOD. Marcus will migrate search to OpenSearch by next Tuesday and enforce hardware keys by Monday. Elena committed to UI wireframes by tomorrow afternoon and security collateral by Thursday EOD. The team approved a 25% R&D cloud budget increase, mandated contractor SOC2 compliance, and decided to hire four senior deep learning engineers."
+    decisions = [
+        "Increase R&D cloud infrastructure budget by 25% starting next sprint",
+        "Mandate SOC2 Type II compliance audits across all contractors and vendors",
+        "Open four senior deep learning engineering requisitions across North America and EMEA",
+    ]
+    action_items = [
+        {"task": "Deliver consolidated HIPAA readiness report and budget audit", "assignee": "Chloe", "deadline": "Friday EOD", "priority": "high"},
+        {"task": "Migrate primary search cluster to OpenSearch and deploy connection limits", "assignee": "Marcus", "deadline": "Next Tuesday", "priority": "high"},
+        {"task": "Deliver UI wireframes and customer survey analysis", "assignee": "Elena", "deadline": "Tomorrow afternoon", "priority": "medium"},
+        {"task": "Enforce hardware security keys across staging and production", "assignee": "Marcus", "deadline": "Next Monday", "priority": "urgent"},
+        {"task": "Prepare enterprise security collateral for sales portal", "assignee": "Elena", "deadline": "Thursday EOD", "priority": "medium"},
+        {"task": "Post four senior ML job requisitions on LinkedIn and Greenhouse", "assignee": "Chloe", "deadline": "Friday noon", "priority": "medium"},
+    ]
+    topics = [
+        "Commercial Growth & HIPAA Compliance",
+        "Cloud Infrastructure & OpenSearch Migration",
+        "Product Telemetry & Analytics Dashboard",
+        "Hiring & Headcount Expansion",
+    ]
+
+    return MeetingScenario(
+        scenario_id="long_executive_townhall",
+        title="Extended Executive Town Hall — Strategy, Infrastructure & Hiring",
+        scenario_type="Executive Town Hall",
+        speakers=speakers,
+        turns=turns,
+        ground_truth_summary=summary,
+        ground_truth_decisions=decisions,
+        ground_truth_action_items=action_items,
+        ground_truth_topics=topics,
+    )
+
+
 def generate_meeting_scenarios() -> Dict[str, MeetingScenario]:
     """Generates complete dictionary of pre-packaged meeting scenarios."""
     scenarios = {
@@ -264,5 +333,6 @@ def generate_meeting_scenarios() -> Dict[str, MeetingScenario]:
         "board_strategy": generate_board_strategy(),
         "client_discovery": generate_client_discovery(),
         "multilingual_india_sync": generate_multilingual_india_sync(),
+        "long_executive_townhall": generate_long_executive_townhall(),
     }
     return scenarios

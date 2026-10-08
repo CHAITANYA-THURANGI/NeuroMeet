@@ -31,6 +31,7 @@ class MinutesSchema(BaseModel):
     key_decisions: List[str] = Field(default_factory=list, description="Decisions agreed upon")
     discussion_topics: List[str] = Field(default_factory=list, description="Agenda topics & chapters")
     key_highlights: List[str] = Field(default_factory=list, description="Top salient takeaways")
+    chapters: List[Dict[str, Any]] = Field(default_factory=list, description="Long-meeting structured chapter breakdowns")
     original_word_count: int = Field(default=0)
     summary_word_count: int = Field(default=0)
     compression_ratio: float = Field(default=0.0)
@@ -104,6 +105,7 @@ class SummarizeResponse(BaseModel):
     executive_summary: str
     key_decisions: List[str]
     discussion_topics: List[str]
+    chapters: List[Dict[str, Any]] = Field(default_factory=list)
     compression_ratio: float
 
 

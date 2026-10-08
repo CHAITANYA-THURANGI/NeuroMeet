@@ -90,6 +90,24 @@ class SpectralSpeakerClusterer:
         if n_samples == 1:
             return np.array([0], dtype=np.int32)
 
+        # Scalable landmark acceleration for long meetings (large window counts)
+        if n_samples > 600:
+            stride = int(math.ceil(n_samples / 500))
+            sub_indices = np.arange(0, n_samples, stride)
+            sub_embs = embeddings[sub_indices]
+            sub_labels = self.cluster(sub_embs, num_speakers=num_speakers)
+
+            k = int(np.max(sub_labels)) + 1
+            centroids = np.zeros((k, embeddings.shape[1]), dtype=np.float32)
+            for cid in range(k):
+                mask = sub_labels == cid
+                if np.any(mask):
+                    centroids[cid] = sub_embs[mask].mean(axis=0)
+                    centroids[cid] /= (np.linalg.norm(centroids[cid]) + 1e-9)
+
+            sims = np.dot(embeddings, centroids.T)
+            return np.argmax(sims, axis=1).astype(np.int32)
+
         # 1. Cosine Affinity Matrix
         affinity = cosine_affinity_matrix(embeddings)
 

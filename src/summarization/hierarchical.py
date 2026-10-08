@@ -49,17 +49,33 @@ class HierarchicalMeetingSummarizer:
 
     @torch.no_grad()
     def rank_salience(self, utterances: List[str]) -> List[float]:
-        """Calculates utterance-level attention weights reflecting meeting importance."""
+        """Calculates utterance-level attention weights reflecting meeting importance across long meetings."""
         if not utterances:
             return []
-        inputs = self._prepare_tensors(utterances)
-        utt_context, _ = self.model.encode(inputs)
 
-        # Global meeting context query
-        q = utt_context.mean(dim=1, keepdim=True)
-        _, weights = self.model.cross_attn(q, utt_context, utt_context)
-        weights_np = weights.squeeze().cpu().numpy()
+        all_weights: List[float] = []
+        chunk_size = self.max_utts
 
-        if weights_np.ndim == 0:
-            return [1.0]
-        return [round(float(w), 4) for w in weights_np[: len(utterances)]]
+        # Chunk utterances to scale to long meetings of arbitrary duration
+        for start_idx in range(0, len(utterances), chunk_size):
+            chunk_utts = utterances[start_idx : start_idx + chunk_size]
+            inputs = self._prepare_tensors(chunk_utts)
+            utt_context, _ = self.model.encode(inputs)
+
+            # Global meeting context query for this chunk
+            q = utt_context.mean(dim=1, keepdim=True)
+            _, weights = self.model.cross_attn(q, utt_context, utt_context)
+            weights_np = weights.squeeze().cpu().numpy()
+
+            if weights_np.ndim == 0:
+                chunk_res = [1.0]
+            else:
+                chunk_res = [float(w) for w in weights_np[: len(chunk_utts)]]
+            all_weights.extend(chunk_res)
+
+        all_weights = all_weights[: len(utterances)]
+        total = sum(all_weights)
+        if total > 0:
+            return [round(w / total, 4) for w in all_weights]
+        return all_weights
+

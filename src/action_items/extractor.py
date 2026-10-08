@@ -10,10 +10,11 @@ from ..models.action_extractor import ActionItemClassifier
 
 ACTION_PATTERNS = [
     # English patterns
-    r"\b(?:i will|i'll|i can)\s+([^,.;]+)",
-    r"\b(?:let's|we need to|we should|we have to)\s+([^,.;]+)",
-    r"\b([a-zA-Z\u0900-\u097F\u0C00-\u0C7F]+)\s+(?:will|should|to take care of|needs to)\s+([^,.;]+)",
+    r"\b(?:i will|i'll|i can|i am going to|i'm going to|i'll handle|i'll take care of|i'll take the lead on|i'll follow up on|i am on|i'm on)\s+([^,.;]+)",
+    r"\b(?:let's|we need to|we should|we have to|we ought to|we must|please make sure to|please ensure)\s+([^,.;]+)",
+    r"\b([a-zA-Z\u0900-\u097F\u0C00-\u0C7F]+)\s+(?:will|should|to take care of|needs to|is going to|to handle|to lead|to follow up on)\s+([^,.;]+)",
     r"\baction item[:\s]+([^,.;]+)",
+    r"\b(?:todo|task)[:\s]+([^,.;]+)",
     r"\bassigned to\s+([a-zA-Z\u0900-\u097F\u0C00-\u0C7F]+)[:\s]+([^,.;]+)",
     # Hindi patterns (Devanagari & Hinglish)
     r"\b(?:main|mai|hum|aap)\s+([^,.;।]+?(?:\bkarunga\b|\bkar dungi\b|\bkarenge\b|\bkarna hai\b|\bdekhunga\b|\bdekhenge\b|\bkar doongi\b))",
@@ -27,14 +28,16 @@ ACTION_PATTERNS = [
 
 DEADLINE_PATTERNS = [
     # English deadlines
-    r"\b(?:by|before|due)\s+([a-zA-Z0-9\s]+?(?:eod|friday|monday|tuesday|wednesday|thursday|tomorrow|next week|end of week|end of month|q[1-4]))",
+    r"\b(?:by|before|due)\s+([a-zA-Z0-9\s]+?(?:eod|cob|cop|friday|monday|tuesday|wednesday|thursday|saturday|sunday|tomorrow|tomorrow\s+morning|tomorrow\s+afternoon|tomorrow\s+evening|tomorrow\s+eod|next week|this week|end of week|end of month|end of sprint|next sprint|q[1-4]))",
     r"\b(?:by|before)\s+([0-9]{1,2}(?::[0-9]{2})?\s*(?:am|pm)?)",
-    r"\b(?:by)\s+([a-zA-Z]+\s+[0-9]{1,2})",
+    r"\b(?:by)\s+([a-zA-Z]+\s+[0-9]{1,2}(?:st|nd|rd|th)?)",
+    r"\b(?:in|within)\s+([0-9]+\s+(?:days|hours|weeks))",
+    r"\b(?:deadline is|due on)\s+([a-zA-Z0-9\s]+)",
     # Hindi deadlines (कल शाम तक, कल तक, शुक्रवार तक, सोमवार तक, अगले हफ्ते, kal tak, shukrawar tak, kal shaam tak)
     r"((?:कल|आज|शुक्रवार|सोमवार|मंगलवार|बुधवार|गुरुवार|शनिवार|रविवार|अगले\s+हफ्ते)(?:\s+(?:सुबह|दोपहर|शाम|रात|ईओडी))?\s*तक)",
     r"([a-zA-Z\u0900-\u097F0-9\s]+?(?:kal tak|shukrawar tak|somwar tak|agale hafte|kal shaam tak|kal sham tak))",
     # Telugu deadlines (రేపు, శుక్రవారం లోగా, శుక్రవారం లోపల, సోమవారం లోగా, repu, repu morning, shukravaram loga)
-    r"((?:రేపు|ఈరోజు|శుక్రవారం|సోమవారం|మంగళవారం|బుధవారం|గురువారం|శనివారం|ఆదివారం|వచ్చే\s+వారం)(?:\s+(?:ఉదయం|సాయంత్రం|మధ్యాహ్నం))?\s*(?:లోగా|లోపల|వరకు))",
+    r"((?:రేపు|ఈరోజు|శుక్రవారం|సోమవారం|మంగళవారం|బుधవారం|గురువారం|శనివారం|ఆదివారం|వచ్చే\s+వారం)(?:\s+(?:ఉదయం|సాయంత్రం|మధ్యాహ్నం))?\s*(?:లోగా|లోపల|వరకు))",
     r"([a-zA-Z\u0C00-\u0C7F0-9\s]+?(?:repu\s*morning|repu\s*afternoon|repu|shukravaram loga|shukravaram lopala|somavaram loga|vache vaaram|repu lopu))",
 ]
 

@@ -12,14 +12,22 @@ from .hierarchical import HierarchicalMeetingSummarizer
 
 DECISION_CUES = [
     r"\bwe decided to\b",
+    r"\bdecided that\b",
     r"\bagreed to\b",
+    r"\bagreed that\b",
+    r"\bagreed on\b",
     r"\blet's go with\b",
     r"\bapproved\b",
     r"\bconsensus is\b",
     r"\bthe plan is to\b",
     r"\bwe'll move forward with\b",
+    r"\bwe will proceed with\b",
+    r"\bwe will adopt\b",
     r"\bconclusion was\b",
     r"\bfinal decision\b",
+    r"\bresolution is\b",
+    r"\bsigned off on\b",
+    r"\bcall made is to\b",
 ]
 
 TOPIC_CUES = [
@@ -31,6 +39,8 @@ TOPIC_CUES = [
     r"\bsecond topic\b",
     r"\bas for\b",
     r"\bin terms of\b",
+    r"\bfocus on\b",
+    r"\blooking at\b",
 ]
 
 
@@ -42,6 +52,7 @@ class MeetingMinutes:
     key_decisions: List[str] = field(default_factory=list)
     discussion_topics: List[str] = field(default_factory=list)
     key_highlights: List[str] = field(default_factory=list)
+    chapters: List[Dict[str, Any]] = field(default_factory=list)
     original_word_count: int = 0
     summary_word_count: int = 0
     compression_ratio: float = 0.0
@@ -108,12 +119,53 @@ class MeetingMinutesGenerator:
         if not topics:
             topics = ["Project Architecture & Roadmap", "Resource Allocation", "Next Steps"]
 
-        # 4. Formulate Executive Summary
+        # 4. Long-Meeting Chapter Segmentation (Phase / Agenda breakdown)
+        chapters: List[Dict[str, Any]] = []
+        n_lines = len(transcript_lines)
+        if n_lines >= 8:
+            import math
+            n_chapters = min(5, max(2, n_lines // 6))
+            chunk_len = max(3, math.ceil(n_lines / n_chapters))
+            for c_idx in range(n_chapters):
+                start = c_idx * chunk_len
+                end = min(n_lines, (c_idx + 1) * chunk_len)
+                if start >= n_lines:
+                    break
+                c_slice = transcript_lines[start:end]
+                if not c_slice:
+                    continue
+                c_highlights = self.textrank.summarize(c_slice, top_n=min(2, len(c_slice)))
+                c_summary = " ".join([re.sub(r"^[^:]+:\s*", "", ch) for ch in c_highlights])
+                c_title = topics[c_idx] if c_idx < len(topics) else f"Phase {c_idx + 1}: Discussion & Updates"
+                chapters.append({
+                    "chapter_index": c_idx + 1,
+                    "title": c_title,
+                    "start_turn": start,
+                    "end_turn": end - 1,
+                    "summary": c_summary or "Discussion segment notes.",
+                    "turns_count": len(c_slice),
+                })
+        else:
+            chapters.append({
+                "chapter_index": 1,
+                "title": topics[0] if topics else "Main Meeting Discussion",
+                "start_turn": 0,
+                "end_turn": max(0, n_lines - 1),
+                "summary": " ".join([re.sub(r"^[^:]+:\s*", "", h) for h in highlights[:2]]) or "Meeting discussion overview.",
+                "turns_count": n_lines,
+            })
+
+        # 5. Formulate Executive Summary
         summary_sentences = []
-        for h in highlights[:3]:
-            # Strip speaker prefix if present (e.g., "Alice: ")
-            clean_h = re.sub(r"^[A-Za-z0-9\s]+:\s*", "", h)
-            summary_sentences.append(clean_h)
+        if chapters and len(chapters) > 1:
+            for ch in chapters:
+                if ch["summary"]:
+                    summary_sentences.append(ch["summary"])
+        else:
+            for h in highlights[:3]:
+                # Strip speaker prefix if present (e.g., "Alice: ")
+                clean_h = re.sub(r"^[A-Za-z0-9\s]+:\s*", "", h)
+                summary_sentences.append(clean_h)
 
         exec_summary = " ".join(summary_sentences)
         summary_words = len(exec_summary.split())
@@ -125,6 +177,7 @@ class MeetingMinutesGenerator:
             key_decisions=decisions,
             discussion_topics=topics[:5],
             key_highlights=highlights,
+            chapters=chapters,
             original_word_count=orig_words,
             summary_word_count=summary_words,
             compression_ratio=max(0.0, ratio),

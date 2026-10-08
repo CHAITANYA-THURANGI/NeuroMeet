@@ -89,6 +89,11 @@ class MeetingProcessingResult:
         for topic in self.minutes.discussion_topics:
             lines.append(f"- 🏷️ {topic}")
 
+        if hasattr(self.minutes, "chapters") and self.minutes.chapters and len(self.minutes.chapters) > 1:
+            lines.append("\n### Structured Agenda Phases:")
+            for ch in self.minutes.chapters:
+                lines.append(f"- **{ch.get('title', 'Phase')}** (Turns {ch.get('start_turn', 0) + 1}–{ch.get('end_turn', 0) + 1}): {ch.get('summary', '')}")
+
         lines.extend([
             "\n## 5. Meeting Dynamics & Health",
             f"- **Dominant Speaker:** {self.participation.dominant_speaker}",
