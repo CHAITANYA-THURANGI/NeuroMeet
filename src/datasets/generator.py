@@ -171,6 +171,91 @@ def generate_client_discovery() -> MeetingScenario:
     )
 
 
+def generate_multilingual_india_sync() -> MeetingScenario:
+    """Multilingual Engineering Sync (Hindi, Telugu, and English)."""
+    speakers = ["Rajesh (Engineering Manager)", "Sneha (Backend Lead)", "Karthik (Mobile & ML Lead)", "Ananya (Product Manager)"]
+    turns = [
+        {
+            "speaker": "Rajesh (Engineering Manager)",
+            "start_sec": 0.0,
+            "end_sec": 6.5,
+            "language": "en",
+            "text": "Good morning everyone. Let's do our weekly multi-region sprint sync. Sneha, payment gateway latency pe kya update hai?",
+        },
+        {
+            "speaker": "Sneha (Backend Lead)",
+            "start_sec": 7.0,
+            "end_sec": 14.2,
+            "language": "hi",
+            "translation": "Redis cache has reduced latency by 40%. I will deploy the database index optimization patch by tomorrow evening.",
+            "text": "हाँ राजेश, Redis cache लगाने के बाद latency 40% कम हो गई है। मैं कल शाम तक database index optimization patch deploy करूँगी।",
+        },
+        {
+            "speaker": "Karthik (Mobile & ML Lead)",
+            "start_sec": 15.0,
+            "end_sec": 22.8,
+            "language": "te",
+            "translation": "The offline speech recognition model on the mobile client is working smoothly. I will share the Android SDK build with the QA team by Friday.",
+            "text": "మొబైల్ క్లయింట్‌లో offline speech recognition model చాలా వేగంగా పనిచేస్తోంది. నేను శుక్రవారం లోగా Android SDK build ని QA టీమ్‌కి పంపిస్తాను.",
+        },
+        {
+            "speaker": "Ananya (Product Manager)",
+            "start_sec": 23.5,
+            "end_sec": 30.5,
+            "language": "hi",
+            "translation": "Excellent. We also need to localize the dashboard UI for both Hindi and Telugu before next Monday.",
+            "text": "बहुत बढ़िया! We also need to localize the dashboard UI for both Hindi and Telugu before next Monday so regional pilot users can test it.",
+        },
+        {
+            "speaker": "Karthik (Mobile & ML Lead)",
+            "start_sec": 31.0,
+            "end_sec": 36.5,
+            "language": "te",
+            "translation": "Sure, I will complete the Telugu string localization by Thursday evening.",
+            "text": "తప్పకుండా, నేను గురువారం సాయంత్రం లోగా Telugu localization strings ని finalize చేసి PR raise చేస్తాను.",
+        },
+        {
+            "speaker": "Sneha (Backend Lead)",
+            "start_sec": 37.0,
+            "end_sec": 42.0,
+            "language": "hi",
+            "translation": "And I will finalize the Hindi localization translations by Friday morning.",
+            "text": "और मैं शुक्रवार सुबह तक Hindi translations review करके master branch में merge करवा दूँगी।",
+        },
+        {
+            "speaker": "Rajesh (Engineering Manager)",
+            "start_sec": 42.5,
+            "end_sec": 49.0,
+            "language": "en",
+            "text": "Fantastic work team. So we decided to roll out the multilingual pilot in Mumbai and Hyderabad next Tuesday.",
+        },
+    ]
+    summary = "The multilingual engineering sync reviewed payment gateway latency, mobile offline speech models, and regional localization. Sneha confirmed 40% latency reduction via Redis and committed to deploying database index optimizations by tomorrow evening. Karthik reported offline speech recognition success on mobile and committed to sharing the Android SDK by Friday and Telugu strings by Thursday. Sneha will finalize Hindi translations by Friday. The team agreed on rolling out the multilingual pilot in Mumbai and Hyderabad next Tuesday."
+    decisions = [
+        "Roll out multilingual meeting pilot in Mumbai and Hyderabad next Tuesday",
+        "Mandate Hindi and Telugu localizations before regional beta release",
+    ]
+    action_items = [
+        {"task": "Deploy database index optimization patch", "assignee": "Sneha", "deadline": "कल शाम तक", "priority": "high"},
+        {"task": "Share Android SDK build with QA team", "assignee": "Karthik", "deadline": "శుక్రవారం లోగా", "priority": "high"},
+        {"task": "Finalize Telugu localization strings and raise PR", "assignee": "Karthik", "deadline": "గురువారం సాయంత్రం", "priority": "medium"},
+        {"task": "Review and merge Hindi localization translations", "assignee": "Sneha", "deadline": "शुक्रवार सुबह तक", "priority": "medium"},
+    ]
+    topics = ["Payment Gateway Latency & DB Optimization", "Mobile Offline Speech Recognition SDK", "Regional Localization (Hindi & Telugu)", "Mumbai & Hyderabad Pilot Rollout"]
+
+    return MeetingScenario(
+        scenario_id="multilingual_india_sync",
+        title="Multilingual Engineering Sync — Hindi, Telugu & English",
+        scenario_type="Multilingual Engineering Sync",
+        speakers=speakers,
+        turns=turns,
+        ground_truth_summary=summary,
+        ground_truth_decisions=decisions,
+        ground_truth_action_items=action_items,
+        ground_truth_topics=topics,
+    )
+
+
 def generate_meeting_scenarios() -> Dict[str, MeetingScenario]:
     """Generates complete dictionary of pre-packaged meeting scenarios."""
     scenarios = {
@@ -178,5 +263,6 @@ def generate_meeting_scenarios() -> Dict[str, MeetingScenario]:
         "tech_postmortem": generate_tech_postmortem(),
         "board_strategy": generate_board_strategy(),
         "client_discovery": generate_client_discovery(),
+        "multilingual_india_sync": generate_multilingual_india_sync(),
     }
     return scenarios

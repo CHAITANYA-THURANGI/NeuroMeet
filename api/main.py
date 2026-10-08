@@ -102,8 +102,9 @@ async def process_transcript(req: ProcessTranscriptRequest) -> MeetingAnalysisRe
 async def process_audio(
     file: UploadFile = File(...),
     title: Optional[str] = Form(None),
+    language: Optional[str] = Form(None),
 ) -> MeetingAnalysisResponse:
-    """Processes uploaded audio (WAV, MP3, etc.) through VAD, Diarization, SpeechCTC, and Meeting Intelligence."""
+    """Processes uploaded audio (WAV, MP3, WebM) through VAD, Diarization, Multilingual ASR, and Meeting Intelligence."""
     pipeline = get_pipeline()
     contents = await file.read()
 
@@ -112,7 +113,7 @@ async def process_audio(
 
     try:
         effective_title = title or file.filename or "Audio Meeting Analysis"
-        result = pipeline.process_audio(contents, title=effective_title)
+        result = pipeline.process_audio(contents, title=effective_title, language=language)
         return MeetingAnalysisResponse(**result.to_dict())
     except Exception as e:
         logger.error(f"Error processing audio: {e}", exc_info=True)

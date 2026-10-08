@@ -9,6 +9,8 @@ class TurnSchema(BaseModel):
     turn_index: int = Field(default=0, description="Sequential index of dialogue turn")
     speaker: str = Field(..., description="Speaker identifier or name")
     text: str = Field(..., description="Transcribed spoken utterance")
+    language: Optional[str] = Field(default="en", description="Detected language code (en, hi, te, etc.)")
+    translation: Optional[str] = Field(default=None, description="English translation if turn is non-English")
     start_sec: Optional[float] = Field(default=None, description="Start timestamp in seconds")
     end_sec: Optional[float] = Field(default=None, description="End timestamp in seconds")
     duration_sec: Optional[float] = Field(default=None, description="Turn duration in seconds")
@@ -83,6 +85,7 @@ class MeetingAnalysisResponse(BaseModel):
     participation: ParticipationSchema
     sentiment: SentimentSchema
     health: HealthSchema
+    detected_languages: List[str] = Field(default_factory=lambda: ["en"], description="Languages spoken across the meeting")
 
 
 class ProcessTranscriptRequest(BaseModel):

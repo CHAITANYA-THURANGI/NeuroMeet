@@ -7,6 +7,7 @@ from typing import List, Set, Tuple
 import numpy as np
 
 
+# English conversational stopwords
 STOPWORDS: Set[str] = {
     "a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are",
     "aren't", "as", "at", "be", "because", "been", "before", "being", "below", "between", "both",
@@ -22,11 +23,29 @@ STOPWORDS: Set[str] = {
     "um", "uh", "like", "right", "know", "think"
 }
 
+# Hindi conversational stopwords & particles (Devanagari & Romanized Hinglish)
+HINDI_STOPWORDS: Set[str] = {
+    "है", "हैं", "का", "की", "के", "में", "और", "तो", "भी", "से", "को", "पर", "यह", "वह",
+    "था", "थी", "थे", "गया", "कर", "दिया", "लिया", "होता", "सकता", "चाहिए", "नहीं", "मत",
+    "hai", "hain", "kaa", "kii", "ke", "mein", "aur", "toh", "bhi", "se", "ko", "par",
+    "tha", "thi", "the", "kare", "karna", "nahi"
+}
+
+# Telugu conversational stopwords & particles (Telugu script & Romanized Tenglish)
+TELUGU_STOPWORDS: Set[str] = {
+    "మరియు", "కానీ", "లో", "యొక్క", "అని", "తో", "నుండి", "కోసం", "ద్వారా", "వద్ద",
+    "ఉంది", "ఉన్నారు", "చేయండి", "చేసారు", "లేదు", "కాదు", "అవును", "ఇది", "అది",
+    "mariyu", "kaani", "kani", "lo", "yokka", "ani", "tho", "nundi", "kosam",
+    "undi", "unnaru", "ledu", "kadu", "idi", "adi", "inka"
+}
+
+ALL_STOPWORDS: Set[str] = STOPWORDS | HINDI_STOPWORDS | TELUGU_STOPWORDS
+
 
 def tokenize_words(text: str) -> List[str]:
-    """Tokenizes text into lowercase alphanumeric words."""
-    words = re.findall(r"\b[a-zA-Z0-9_\-]+\b", text.lower())
-    return [w for w in words if w not in STOPWORDS and len(w) > 2]
+    """Tokenizes text into lowercase words across English, Hindi (Devanagari/Romanized), and Telugu."""
+    words = re.findall(r"\b[\w\-]+\b", text.lower(), flags=re.UNICODE)
+    return [w for w in words if w not in ALL_STOPWORDS and len(w) > 1]
 
 
 class TextRankExtractiveSummarizer:

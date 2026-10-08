@@ -65,17 +65,20 @@ class MeetingQAEngine:
             )
 
         q_clean = query.strip().lower()
-        q_tokens = set(re.findall(r"\b[a-zA-Z0-9]+\b", q_clean))
+        q_tokens = set(re.findall(r"\b\w+\b", q_clean, flags=re.UNICODE))
 
         scored_turns = []
 
         for idx, turn in enumerate(turns):
             text = turn.get("text", "")
+            translation = turn.get("translation", "")
             spk = turn.get("speaker", f"Speaker {idx + 1}")
             start_t = turn.get("start_sec", None)
 
-            # 1. Lexical overlap score
-            t_tokens = set(re.findall(r"\b[a-zA-Z0-9]+\b", text.lower()))
+            # 1. Lexical overlap score (matches both native Hindi/Telugu words and English translation)
+            t_tokens = set(re.findall(r"\b\w+\b", text.lower(), flags=re.UNICODE))
+            if translation:
+                t_tokens |= set(re.findall(r"\b\w+\b", translation.lower(), flags=re.UNICODE))
             overlap = len(q_tokens.intersection(t_tokens))
             lex_score = overlap / math.sqrt(len(q_tokens) * max(1, len(t_tokens)))
 

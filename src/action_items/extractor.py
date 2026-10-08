@@ -9,20 +9,43 @@ from ..models.action_extractor import ActionItemClassifier
 
 
 ACTION_PATTERNS = [
+    # English patterns
     r"\b(?:i will|i'll|i can)\s+([^,.;]+)",
     r"\b(?:let's|we need to|we should|we have to)\s+([^,.;]+)",
-    r"\b([a-zA-Z]+)\s+(?:will|should|to take care of|needs to)\s+([^,.;]+)",
+    r"\b([a-zA-Z\u0900-\u097F\u0C00-\u0C7F]+)\s+(?:will|should|to take care of|needs to)\s+([^,.;]+)",
     r"\baction item[:\s]+([^,.;]+)",
-    r"\bassigned to\s+([a-zA-Z]+)[:\s]+([^,.;]+)",
+    r"\bassigned to\s+([a-zA-Z\u0900-\u097F\u0C00-\u0C7F]+)[:\s]+([^,.;]+)",
+    # Hindi patterns (Devanagari & Hinglish)
+    r"\b(?:main|mai|hum|aap)\s+([^,.;।]+?(?:\bkarunga\b|\bkar dungi\b|\bkarenge\b|\bkarna hai\b|\bdekhunga\b|\bdekhenge\b|\bkar doongi\b))",
+    r"(?:मैं|हम|आप)\s+([^।\n,;]+?(?:करूँगी|करूंगी|करूँगा|करूंगा|करेंगे|करेगा|करेगी|कर देना|करना है|दूँगी|दूंगी|दूँगा|दूंगा|देखेंगे|देखूँगी|देखूँगा))",
+    r"\b([a-zA-Z\u0900-\u097F]+)\s+(?:ye karega|karega|karenge|karna padega|करेगा|करेगी|करेंगे)",
+    # Telugu patterns (Telugu script & Tenglish)
+    r"\b(?:nenu|manam|meeru)\s+([^,.;।]+?(?:\bchestanu\b|\bpampistanu\b|\bcheyali\b|\bcheddam\b|\bchustanu\b|\bchudali\b))",
+    r"(?:నేను|మనం|మీరు)\s+([^।\n.;,]+?(?:చేస్తాను|చేయాలి|చేద్దాం|చూస్తాను|చూడాలి|పంపిస్తాను|తీసుకుంటాను|ఇస్తాను|రాస్తాను|చేస్తాం|పంపిస్తాం))",
+    r"\b([a-zA-Z\u0C00-\u0C7F]+)\s+(?:chestadu|chestaru|cheyali|chustaru|చేస్తారు|చేస్తుంది|చేయాలి)",
 ]
 
 DEADLINE_PATTERNS = [
+    # English deadlines
     r"\b(?:by|before|due)\s+([a-zA-Z0-9\s]+?(?:eod|friday|monday|tuesday|wednesday|thursday|tomorrow|next week|end of week|end of month|q[1-4]))",
     r"\b(?:by|before)\s+([0-9]{1,2}(?::[0-9]{2})?\s*(?:am|pm)?)",
     r"\b(?:by)\s+([a-zA-Z]+\s+[0-9]{1,2})",
+    # Hindi deadlines (कल शाम तक, कल तक, शुक्रवार तक, सोमवार तक, अगले हफ्ते, kal tak, shukrawar tak, kal shaam tak)
+    r"((?:कल|आज|शुक्रवार|सोमवार|मंगलवार|बुधवार|गुरुवार|शनिवार|रविवार|अगले\s+हफ्ते)(?:\s+(?:सुबह|दोपहर|शाम|रात|ईओडी))?\s*तक)",
+    r"([a-zA-Z\u0900-\u097F0-9\s]+?(?:kal tak|shukrawar tak|somwar tak|agale hafte|kal shaam tak|kal sham tak))",
+    # Telugu deadlines (రేపు, శుక్రవారం లోగా, శుక్రవారం లోపల, సోమవారం లోగా, repu, repu morning, shukravaram loga)
+    r"((?:రేపు|ఈరోజు|శుక్రవారం|సోమవారం|మంగళవారం|బుధవారం|గురువారం|శనివారం|ఆదివారం|వచ్చే\s+వారం)(?:\s+(?:ఉదయం|సాయంత్రం|మధ్యాహ్నం))?\s*(?:లోగా|లోపల|వరకు))",
+    r"([a-zA-Z\u0C00-\u0C7F0-9\s]+?(?:repu\s*morning|repu\s*afternoon|repu|shukravaram loga|shukravaram lopala|somavaram loga|vache vaaram|repu lopu))",
 ]
 
-URGENT_WORDS = {"urgent", "asap", "blocker", "critical", "immediately", "high priority", "p0", "p1"}
+URGENT_WORDS = {
+    # English
+    "urgent", "asap", "blocker", "critical", "immediately", "high priority", "p0", "p1",
+    # Hindi
+    "jaldi", "turant", "zaroori", "bohot zaroori", "जल्दी", "तुरंत", "ज़रूरी", "जरूरी",
+    # Telugu
+    "ventane", "tvaraga", "urgent ga", "chala important", "వెంటనే", "త్వరగా", "ముఖ్యం"
+}
 
 
 @dataclass
@@ -86,9 +109,10 @@ class DeepActionExtractor:
 
         # Check for deadline cues
         for d_pat in DEADLINE_PATTERNS:
-            d_match = re.search(d_pat, lower)
+            d_match = re.search(d_pat, clean, re.IGNORECASE)
             if d_match:
-                matched_deadline = d_match.group(1).strip().capitalize()
+                deadline_str = d_match.group(1).strip()
+                matched_deadline = deadline_str.capitalize() if deadline_str.isascii() else deadline_str
                 break
 
         # Check for urgency cues
